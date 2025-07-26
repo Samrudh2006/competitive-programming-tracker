@@ -46,22 +46,14 @@ with st.sidebar:
         st.markdown("---")
 
     # Sidebar Menu
-    st.markdown("### 📂 Menu")
-    menu_items = [
-        ("📊 DSA Tracker", "#dsa-tracker"),
-        ("📘 Submissions", "#submissions"),
-        ("📈 Progress", "#progress"),
-        ("📚 Problems", "#problems"),
-        ("💬 Discuss", "#discuss"),
-        ("🏆 Contests", "#contests"),
-        ("🎯 Daily Goals", "#daily-goals"),
-        ("📝 Notebook", "#notebook"),
-        ("🧪 Try New Features", "#try-new-features"),
-        ("⚙️ Settings", "#settings"),
-        ("🚪 Sign Out", "#sign-out")
-    ]
-    for name, link in menu_items:
-        st.markdown(f"[{name}]({link})")
+    
+st.markdown("### 📂 Menu")
+st.markdown("📊 [DSA Tracker](https://unstop.com/dsa-30)")
+st.markdown("📘 [Submissions](https://leetcode.com/dashboard)")
+st.markdown("📈 [Progress](#progress)")
+st.markdown("💬 [Discuss](https://discuss.geeksforgeeks.org/)")
+st.markdown("🏆 [Contests](https://leetcode.com/contest/)")
+st.markdown("📝 [Notebook](#notebook)")
 
     # Theme Toggle
     theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
