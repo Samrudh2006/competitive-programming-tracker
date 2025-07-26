@@ -15,6 +15,10 @@ if "log" not in st.session_state:
     st.session_state.log = []
 if "starred_notes" not in st.session_state:
     st.session_state.starred_notes = []
+if "timer_sessions" not in st.session_state:
+    st.session_state.timer_sessions = []
+if "topics" not in st.session_state:
+    st.session_state.topics = {}
 
 # --- Sidebar Theme Toggle ---
 theme = st.sidebar.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
@@ -51,25 +55,23 @@ with st.form("log_form"):
     date = st.date_input("📅 Date", value=datetime.date.today())
     count = st.number_input("🔢 Problems Solved", min_value=0)
     notes = st.text_area("📝 Notes")
-    topic = st.selectbox("📚 Topic", ["Arrays", "Strings", "Linked List", "Trees", "Graphs", "DP", "Recursion", "Sorting", "Maths", "Other"])
+    topic_tags = st.text_input("🏷️ Tags (comma separated)", placeholder="e.g., arrays, dp, trees")
     starred = st.checkbox("⭐ Mark as Important")
     submitted = st.form_submit_button("Add Entry")
     if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes, "Topic": topic}
+        entry = {"Date": date, "Solved": count, "Notes": notes}
         st.session_state.log.append(entry)
         if starred:
             st.session_state.starred_notes.append(entry)
-        st.success("✅ Log Added!")
+        if topic_tags:
+            for tag in [t.strip() for t in topic_tags.split(",")]:
+                st.session_state.topics[tag] = st.session_state.topics.get(tag, 0) + count
+        st.success("Log Added!")
 
-# --- Log Display ---
 if st.session_state.log:
     df = pd.DataFrame(st.session_state.log)
-    df["Date"] = pd.to_datetime(df["Date"])
-    df.sort_values("Date", inplace=True)
-
     st.line_chart(df.set_index("Date")["Solved"])
-
-    with st.expander("📘 View Log Data"):
+    with st.expander("📘 View Log"):
         st.dataframe(df)
 
 # --- Weekly Goal Tracker ---
@@ -78,40 +80,44 @@ weekly_goal = st.slider("Set your goal", 0, 70, 35)
 this_week = datetime.date.today().isocalendar()[1]
 solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week)
 st.progress(min(solved_this_week / weekly_goal, 1.0))
-st.write(f"**✅ {solved_this_week} / {weekly_goal} solved this week**")
+st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
 
-# --- Streak Tracker ---
-st.subheader("🔥 Current Streak")
-dates = sorted([pd.to_datetime(i["Date"]).date() for i in st.session_state.log])
-streak = 0
-today = datetime.date.today()
-for i in range(len(dates)-1, -1, -1):
-    if (today - dates[i]).days == streak:
-        streak += 1
-    else:
-        break
-st.write(f"🔥 **You’ve been consistent for {streak} day(s) in a row!**")
+# --- Progress Badge ---
+st.markdown("### 🏅 Achievement Badge")
+if solved_this_week >= weekly_goal:
+    st.success("🎉 Excellent! You've met your weekly goal!")
+elif solved_this_week >= weekly_goal * 0.75:
+    st.info("💪 Almost there! Keep going!")
+else:
+    st.warning("🚀 Push a little more to hit your weekly target!")
 
-# --- Pie Chart for Topic Distribution ---
-if st.session_state.log:
-    st.subheader("📊 Topic Distribution")
-    topic_counts = pd.DataFrame(st.session_state.log)["Topic"].value_counts()
-    if not topic_counts.empty:
-        fig, ax = plt.subplots()
-        ax.pie(topic_counts, labels=topic_counts.index, autopct='%1.1f%%', startangle=90)
-        ax.axis('equal')
-        st.pyplot(fig)
-
-# --- Pomodoro Timer ---
+# --- Pomodoro Timer + Logging ---
 st.subheader("⏱️ Focus Mode (Pomodoro)")
 timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
 if st.button("▶️ Start Timer"):
+    start_time = datetime.datetime.now()
     with st.empty():
         for i in range(timer_min * 60, 0, -1):
             m, s = divmod(i, 60)
             st.metric("Time Left", f"{m:02d}:{s:02d}")
             time.sleep(1)
-        st.success("⏰ Done! Take a break!")
+    end_time = datetime.datetime.now()
+    st.session_state.timer_sessions.append((start_time, end_time))
+    st.success("⏰ Done! Take a break.")
+
+if st.session_state.timer_sessions:
+    st.markdown("### ⌛ Past Focus Sessions")
+    for idx, (start, end) in enumerate(st.session_state.timer_sessions[-5:], 1):
+        duration = end - start
+        st.write(f"{idx}. {start.strftime('%H:%M:%S')} - {end.strftime('%H:%M:%S')} ({duration})")
+
+# --- Topic Distribution Pie Chart ---
+if st.session_state.topics:
+    st.subheader("📊 Most Solved Topics")
+    fig, ax = plt.subplots()
+    ax.pie(st.session_state.topics.values(), labels=st.session_state.topics.keys(), autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    st.pyplot(fig)
 
 # --- Daily Random Challenge ---
 st.subheader("📌 Daily Random Challenge")
@@ -131,35 +137,12 @@ if st.session_state.starred_notes:
     for n in st.session_state.starred_notes[-5:]:
         st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
 
-# --- Flashcard Picker ---
-st.subheader("🧠 DSA Concept Flashcard")
-flashcards = {
-    "Two Pointer": "Efficient for searching pairs/triples in sorted arrays.",
-    "Sliding Window": "For subarrays/substrings of size k or with some constraint.",
-    "Backtracking": "Try all combinations, but prune invalid ones early.",
-    "Dynamic Programming": "Optimal substructure + overlapping subproblems.",
-    "Binary Search": "Used in sorted arrays or to minimize/maximize answers."
-}
-selected = st.selectbox("Choose a concept", list(flashcards.keys()))
-st.info(flashcards[selected])
-
-# --- Bonus Tip Section ---
-st.subheader("💡 Bonus Coding Tip")
-tips = [
-    "Use Leetcode Discuss for hints before seeing full solutions.",
-    "Practice one topic a week to build deep understanding.",
-    "Build your own GitHub repo to track CP progress.",
-    "Explain problems aloud after solving — it deepens retention!",
-    "Start timing your problems to simulate real contests."
-]
-st.success(random.choice(tips))
-
-# --- Export Logs to CSV ---
+# --- Export Log to CSV ---
 if st.session_state.log:
-    st.subheader("📂 Export Your Log")
+    st.subheader("📤 Export Your Log")
     df = pd.DataFrame(st.session_state.log)
     csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download Log as CSV", csv, "cp_log.csv", "text/csv")
+    st.download_button("⬇️ Download Log as CSV", data=csv, file_name="cp_log.csv", mime="text/csv")
 
 # --- Motivational Quote ---
 quotes = [
