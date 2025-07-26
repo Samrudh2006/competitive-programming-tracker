@@ -1,204 +1,80 @@
 import streamlit as st
-import pandas as pd
-import datetime
-import random
-import time
+import base64
 from PIL import Image
 
-# --- Page Setup ---
-st.set_page_config(page_title="💻 CP Tracker", layout="wide")
+st.set_page_config(page_title="Competitive Programming Tracker", layout="wide", page_icon="✨")
 
-# --- Session State Setup ---
-if "user_name" not in st.session_state:
-    st.session_state.user_name = ""
-if "profile_pic" not in st.session_state:
-    st.session_state.profile_pic = None
-if "log" not in st.session_state:
-    st.session_state.log = []
-if "starred_notes" not in st.session_state:
-    st.session_state.starred_notes = []
+# Sidebar menu
+menu_options = ["🏠 Home", "📈 DSA Tracker", "📝 Submissions", "📅 Progress", "💬 Discuss", "🏁 Contests", "📓 Notebook"]
+choice = st.sidebar.radio("Explore Sections", menu_options)
 
+# User Info Submission (only shown once)
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
 
+if not st.session_state.submitted:
+    st.title("🚀 Welcome to Competitive Programming Tracker")
+    st.subheader("Please enter your details")
 
-    # Display Profile
-    if st.session_state.user_name:
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.session_state.profile_pic:
-                img = Image.open(st.session_state.profile_pic)
-                st.image(img, width=50)
+    name = st.text_input("👤 Name")
+    uploaded_img = st.file_uploader("Upload your profile picture", type=["jpg", "png"])
+    if st.button("Submit"):
+        if name:
+            st.session_state.name = name
+            st.session_state.submitted = True
+            if uploaded_img:
+                st.session_state.pic = uploaded_img
             else:
-                st.image("https://cdn-icons-png.flaticon.com/512/149/149071.png", width=50)
+                st.session_state.pic = None
+            st.success("Submitted successfully! Now explore the tracker.")
+        else:
+            st.warning("Please enter your name before submitting.")
+else:
+    # Display name and image once submitted
+    if "name" in st.session_state:
+        col1, col2 = st.columns([1, 6])
+        with col1:
+            if st.session_state.pic:
+                img = Image.open(st.session_state.pic)
+                st.image(img, width=80)
         with col2:
-            st.markdown(f"**{st.session_state.user_name}**")
+            st.markdown(f"### 👋 Hello, **{st.session_state.name}**")
         st.markdown("---")
 
-    # Sidebar Menu
-    st.markdown("### 📂 Menu")
-    menu_items = [
-        ("📊 DSA Tracker", "#dsa-tracker"),
-        ("📘 Submissions", "#submissions"),
-        ("📈 Progress", "#progress"),
-        ("📚 Problems", "#problems"),
-        ("💬 Discuss", "#discuss"),
-        ("🏆 Contests", "#contests"),
-        ("🎯 Daily Goals", "#daily-goals"),
-        ("📝 Notebook", "#notebook"),
-        ("🧪 Try New Features", "#try-new-features"),
-        ("⚙️ Settings", "#settings"),
-        ("🚪 Sign Out", "#sign-out")
-    ]
-    for name, link in menu_items:
-        st.markdown(f"[{name}]({link})")
+# Main content based on selected menu
+if choice == "🏠 Home":
+    st.markdown("## 🌟 Welcome to your Competitive Programming Tracker")
+    st.markdown("Use the sidebar to navigate through different sections like your daily tracker, submission progress, contests, and more.")
 
-    # Theme Toggle
-    theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
-    if theme == "🌙 Dark":
-        st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+elif choice == "📈 DSA Tracker":
+    st.markdown("## 📈 DSA 30 Days Course")
+    st.markdown("[🚀 Start DSA 30 Days Challenge on Unstop](https://unstop.com/dsa-30) ✨")
 
-    # DSA Sheets
-    st.header("📚 DSA Sheets")
-    st.markdown("""
-    - [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)
-    - [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)
-    - [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)
-    - [Neetcode](https://neetcode.io/)
-    - [Blind 75](https://blind75.io/)
-    """)
+elif choice == "📝 Submissions":
+    st.markdown("## 📊 Your LeetCode Submissions Dashboard")
+    st.markdown("[🔗 Open LeetCode Profile](https://leetcode.com/dashboard) 🧠")
 
-# --- Main Area ---
+elif choice == "📅 Progress":
+    st.markdown("## 📅 Track Your Progress")
+    st.markdown("Use a notebook or dashboard to log your daily and weekly progress.")
+    st.info("Coming soon: Auto progress sync!")
 
-# Welcome
-st.markdown(f"<h1>🚀 Welcome, {st.session_state.user_name or 'Coder'}!</h1>", unsafe_allow_html=True)
+elif choice == "💬 Discuss":
+    st.markdown("## 💬 Ask Your DSA Doubts")
+    st.markdown("[📌 Ask on GFG Discuss](https://discuss.geeksforgeeks.org/) 💡")
 
-# Daily Practice Log
-st.subheader("🔥 Daily Practice Log")
-with st.form("log_form"):
-    date = st.date_input("📅 Date", value=datetime.date.today())
-    count = st.number_input("🔢 Problems Solved", min_value=0)
-    notes = st.text_area("📝 Notes")
-    starred = st.checkbox("⭐ Mark as Important")
-    submitted = st.form_submit_button("Add Entry")
+elif choice == "🏁 Contests":
+    st.markdown("## 🏁 Upcoming Contests")
+    st.markdown("[🔥 Participate in LeetCode Contests](https://leetcode.com/contest/) 🏆")
 
-    if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes}
-        st.session_state.log.append(entry)
-        if starred:
-            st.session_state.starred_notes.append(entry)
-        st.success("Log Added!")
-
-# Log Display
-if st.session_state.log:
-    df = pd.DataFrame(st.session_state.log)
-    st.line_chart(df.set_index("Date")["Solved"])
-    with st.expander("📘 View Log"):
-        st.dataframe(df)
-
-# Weekly Goal Tracker
-st.subheader("🎯 Weekly Goal")
-weekly_goal = st.slider("Set your goal", 0, 70, 35)
-this_week = datetime.date.today().isocalendar()[1]
-solved_this_week = sum(
-    i["Solved"] for i in st.session_state.log
-    if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week
-)
-st.progress(min(solved_this_week / weekly_goal, 1.0))
-st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
-
-# Pomodoro Timer
-st.subheader("⏱️ Focus Mode (Pomodoro)")
-timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
-if st.button("▶️ Start Timer"):
-    with st.empty():
-        for i in range(timer_min * 60, 0, -1):
-            m, s = divmod(i, 60)
-            st.metric("Time Left", f"{m:02d}:{s:02d}")
-            time.sleep(1)
-        st.success("⏰ Done! Take a break.")
-
-# Random Challenge
-st.subheader("📌 Daily Random Challenge")
-sheet_links = [
-    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
-    ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
-    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
-    ("Neetcode", "https://neetcode.io/"),
-    ("Blind 75", "https://blind75.io/")
-]
-rand = random.choice(sheet_links)
-st.info(f"Try something new from: [{rand[0]} 🔗]({rand[1]})")
-
-# Starred Notes
-if st.session_state.starred_notes:
-    st.subheader("⭐ Starred Notes")
-    for n in st.session_state.starred_notes[-5:]:
-        st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
-
-# Motivational Quote
-quotes = [
-    "“Consistency is what transforms average into excellence.”",
-    "“The expert in anything was once a beginner.”",
-    "“Code more. Fear less.”",
-    "“Success is the sum of small efforts repeated daily.”"
-]
-st.success(f"💡 {random.choice(quotes)}")
-# --- LeetCode‑style Profile Section ---
-st.markdown("""
-    <style>
-    .profile-card {
-        background-color: #f9f9f9;
-        padding: 1.5rem;
-        border-radius: 20px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-    }
-    .profile-name {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-    .profile-image {
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #FFD700;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("## 👤 Your Profile")
-
-if not st.session_state.profile_submitted:
-    with st.form("profile_form"):
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            uploaded_file = st.file_uploader("Upload Profile Pic", type=["jpg", "jpeg", "png"])
-        with col2:
-            name = st.text_input("Enter Your Name")
-        submitted = st.form_submit_button("🚀 Submit")
-        if submitted:
-            if uploaded_file and name:
-                st.session_state.uploaded_file = uploaded_file
-                st.session_state.profile_name = name
-                st.session_state.profile_submitted = True
-            else:
-                st.error("Please upload a picture and enter your name.")
-else:
-    st.markdown('<div class="profile-card">', unsafe_allow_html=True)
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        st.image(st.session_state.uploaded_file, width=100, use_column_width=False, output_format="auto")
-    with col2:
-        st.markdown(f'<div class="profile-name">👋 Hello, {st.session_state.profile_name}</div>', unsafe_allow_html=True)
-        st.success("Profile submitted successfully!")
-    st.markdown('</div>', unsafe_allow_html=True)
+elif choice == "📓 Notebook":
+    st.markdown("## 📓 Your DSA Notes")
+    note = st.text_area("📝 Write your notes here:")
+    if st.button("💾 Save Note"):
+        st.success("Note saved (not persistent in cloud).")
 
 # Footer
-st.markdown("---")
 st.markdown("""
-<center style='color: gray;'>
-Built with ❤️ using Streamlit | Stay consistent, coder!<br><br>
-👨‍💻 Created by <b>Dwivedula Venkata Satya Samrudh</b>
-</center>
-""", unsafe_allow_html=True)
-
+    <hr style='border:1px solid #666;'>
+    <center>✨ Built with ❤️ using Streamlit | Keep Coding ✨<br>By: <strong>{}</strong></center>
+""".format(st.session_state.get("name", "Your Name")), unsafe_allow_html=True)
