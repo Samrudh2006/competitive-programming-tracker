@@ -79,56 +79,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Sidebar Profile ---
-# --- LeetCode‑style Profile Section ---
-st.markdown("""
-    <style>
-    .profile-card {
-        background-color: #f9f9f9;
-        padding: 1.5rem;
-        border-radius: 20px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-    }
-    .profile-name {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-    .profile-image {
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #FFD700;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
-st.markdown("## 👤 Your Profile")
+st.markdown("## 👤 Profile Setup")
 
-if not st.session_state.profile_submitted:
+if not st.session_state.submitted:
     with st.form("profile_form"):
         col1, col2 = st.columns([1, 3])
+        
         with col1:
-            uploaded_file = st.file_uploader("Upload Profile Pic", type=["jpg", "jpeg", "png"])
+            uploaded_file = st.file_uploader("Upload Profile Picture", type=["jpg", "jpeg", "png"])
+        
         with col2:
             name = st.text_input("Enter Your Name")
-        submitted = st.form_submit_button("🚀 Submit")
-        if submitted:
-            if uploaded_file and name:
+        
+        submit = st.form_submit_button("Submit")
+
+        if submit:
+            if name and uploaded_file:
+                st.session_state.name = name
                 st.session_state.uploaded_file = uploaded_file
-                st.session_state.profile_name = name
-                st.session_state.profile_submitted = True
+                st.session_state.submitted = True
             else:
-                st.error("Please upload a picture and enter your name.")
+                st.warning("Please upload a picture and enter your name.")
 else:
-    st.markdown('<div class="profile-card">', unsafe_allow_html=True)
-    col1, col2 = st.columns([1, 4])
+    # Display submitted profile
+    col1, col2 = st.columns([1, 3])
     with col1:
-        st.image(st.session_state.uploaded_file, width=100, use_column_width=False, output_format="auto")
+        st.image(st.session_state.uploaded_file, width=100)
     with col2:
-        st.markdown(f'<div class="profile-name">👋 Hello, {st.session_state.profile_name}</div>', unsafe_allow_html=True)
-        st.success("Profile submitted successfully!")
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f"### 👋 Hello, **{st.session_state.name}**!")
+
+    st.success("✅ Profile submitted successfully!")
 
 # --- Main Header ---
 st.markdown(f"<div class='title'>🚀 Welcome, {st.session_state.user_name}!</div>", unsafe_allow_html=True)
@@ -199,7 +180,6 @@ if st.session_state.starred_notes:
         """, unsafe_allow_html=True)
 
 # --- Footer ---
-
 st.markdown("---")
 st.markdown("""
 <center style='color: gray;'>
