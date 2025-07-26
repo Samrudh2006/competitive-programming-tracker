@@ -132,6 +132,51 @@ if st.session_state.log:
     with st.expander("📘 View Full Log"):
         st.dataframe(df)
 st.markdown("</div>", unsafe_allow_html=True)
+# ---------- Focus Timer Section ---------- #
+import time
+
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.subheader("⏳ Focus Mode Timer (Pomodoro)")
+
+# Initialize state variables
+if "timer_running" not in st.session_state:
+    st.session_state.timer_running = False
+if "start_time" not in st.session_state:
+    st.session_state.start_time = None
+if "duration" not in st.session_state:
+    st.session_state.duration = 25 * 60  # default 25 min
+
+# Input duration
+focus_minutes = st.slider("Set Focus Time (minutes)", min_value=5, max_value=60, value=25)
+focus_seconds = focus_minutes * 60
+
+# Timer buttons
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("▶️ Start Focus Timer"):
+        st.session_state.timer_running = True
+        st.session_state.start_time = time.time()
+        st.session_state.duration = focus_seconds
+with col2:
+    if st.button("⏹ Stop Timer"):
+        st.session_state.timer_running = False
+
+# Display the timer countdown
+if st.session_state.timer_running:
+    elapsed = int(time.time() - st.session_state.start_time)
+    remaining = st.session_state.duration - elapsed
+    if remaining <= 0:
+        st.success("✅ Time's up! Take a break.")
+        st.balloons()
+        st.session_state.timer_running = False
+    else:
+        minutes, seconds = divmod(remaining, 60)
+        st.warning(f"⏱ {minutes:02d}:{seconds:02d} remaining...")
+else:
+    st.info("⏸ Timer not running. Set your focus session and click Start.")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 # ----------- Footer ----------- #
 st.markdown("<hr>", unsafe_allow_html=True)
