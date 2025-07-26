@@ -1,116 +1,149 @@
-import streamlit as st
+# NOTE: This version removes Streamlit dependency for environments where it isn't available.
+# It prints logs and progress via standard output (console-based simulation).
+# This version also avoids using `input()` to ensure compatibility with sandboxed environments.
+
 import pandas as pd
 import datetime
 import random
 import time
+import matplotlib.pyplot as plt
+import io
 
-# --- Page Setup ---
-st.set_page_config(page_title="💻 CP Tracker", layout="wide")
+# --- Mocked Session State ---
+class SessionState:
+    def __init__(self):
+        self.user_name = "Coder"
+        self.log = []
+        self.starred_notes = []
+        self.timer_sessions = []
+        self.topics = {}
 
-# --- Session State Setup ---
-if "user_name" not in st.session_state:
-    st.session_state.user_name = ""
-if "log" not in st.session_state:
-    st.session_state.log = []
-if "starred_notes" not in st.session_state:
-    st.session_state.starred_notes = []
+st = SessionState()
 
-# --- Sidebar Theme Toggle ---
-theme = st.sidebar.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
-if theme == "🌙 Dark":
-    st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+# --- Input Substitution ---
+def simulate_input(prompt, fallback):
+    print(f"{prompt} [Auto: {fallback}]")
+    return fallback
 
-# --- User Profile ---
-st.sidebar.header("👤 Profile")
-name_input = st.sidebar.text_input("Enter your name", value=st.session_state.user_name or "Coder")
-st.session_state.user_name = name_input or "Coder"
+# --- Functions for Console Mode ---
+def show_dashboard():
+    print(f"\n=== DASHBOARD for {st.user_name} ===")
+    if st.log:
+        df = pd.DataFrame(st.log)
+        print("\n📘 Log:")
+        print(df)
 
-profile_pic = st.sidebar.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-if profile_pic:
-    st.sidebar.image(profile_pic, width=100)
-else:
-    st.sidebar.image("https://avatars.githubusercontent.com/u/9919?s=200&v=4", width=100)
+        print("\n📊 Weekly Progress Chart")
+        df.set_index("Date")["Solved"].plot(title="Problems Solved Per Day")
+        plt.show()
 
-# --- DSA Sheet Links ---
-st.sidebar.header("📚 DSA Sheets")
-st.sidebar.markdown("""
-- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)
-- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)
-- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)
-- [Neetcode](https://neetcode.io/)
-- [Blind 75](https://blind75.io/)
-""")
+        if st.topics:
+            print("\n📊 Topics Pie Chart")
+            fig, ax = plt.subplots()
+            ax.pie(st.topics.values(), labels=st.topics.keys(), autopct='%1.1f%%', startangle=90)
+            ax.axis('equal')
+            plt.title("Most Solved Topics")
+            plt.show()
 
-# --- Welcome Header ---
-st.markdown(f"<h1>🚀 Welcome, {st.session_state.user_name}!</h1>", unsafe_allow_html=True)
+    weekly_goal = 35
+    this_week = datetime.date.today().isocalendar()[1]
+    solved_this_week = sum(i["Solved"] for i in st.log if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week)
+    print(f"\nWeekly Progress: {solved_this_week}/{weekly_goal}")
 
-# --- Daily Practice Log ---
-st.subheader("🔥 Daily Practice Log")
-with st.form("log_form"):
-    date = st.date_input("📅 Date", value=datetime.date.today())
-    count = st.number_input("🔢 Problems Solved", min_value=0)
-    notes = st.text_area("📝 Notes")
-    starred = st.checkbox("⭐ Mark as Important")
-    submitted = st.form_submit_button("Add Entry")
-    if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes}
-        st.session_state.log.append(entry)
-        if starred:
-            st.session_state.starred_notes.append(entry)
-        st.success("Log Added!")
+    if solved_this_week >= weekly_goal:
+        print("🎉 Excellent! You've met your weekly goal!")
+    elif solved_this_week >= weekly_goal * 0.75:
+        print("💪 Almost there! Keep going!")
+    else:
+        print("🚀 Push a little more to hit your weekly target!")
 
-if st.session_state.log:
-    df = pd.DataFrame(st.session_state.log)
-    st.line_chart(df.set_index("Date")["Solved"])
-    with st.expander("📘 View Log"):
-        st.dataframe(df)
+def add_daily_log():
+    print("\n=== Add Daily Log ===")
+    date = simulate_input("Date (YYYY-MM-DD):", str(datetime.date.today()))
+    count = int(simulate_input("Problems Solved:", "3"))
+    notes = simulate_input("Notes:", "Solved 3 problems")
+    tags = simulate_input("Tags (comma-separated):", "arrays")
+    starred = simulate_input("Starred? (y/n):", "y").lower() == 'y'
 
-# --- Weekly Goal Tracker ---
-st.subheader("🎯 Weekly Goal")
-weekly_goal = st.slider("Set your goal", 0, 70, 35)
-this_week = datetime.date.today().isocalendar()[1]
-solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week)
-st.progress(min(solved_this_week / weekly_goal, 1.0))
-st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
+    entry = {"Date": date, "Solved": count, "Notes": notes}
+    st.log.append(entry)
+    if starred:
+        st.starred_notes.append(entry)
+    for tag in [t.strip() for t in tags.split(",") if t.strip()]:
+        st.topics[tag] = st.topics.get(tag, 0) + count
+    print("Log Added!")
 
-# --- Pomodoro Timer ---
-st.subheader("⏱️ Focus Mode (Pomodoro)")
-timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
-if st.button("▶️ Start Timer"):
-    with st.empty():
-        for i in range(timer_min * 60, 0, -1):
-            m, s = divmod(i, 60)
-            st.metric("Time Left", f"{m:02d}:{s:02d}")
+def focus_mode():
+    print("\n=== Focus Mode ===")
+    minutes = int(simulate_input("Focus time in minutes (e.g., 25):", "1"))
+    print("Timer started...")
+    start_time = datetime.datetime.now()
+    try:
+        for i in range(minutes * 60, 0, -1):
+            if i % 60 == 0:
+                print(f"Time left: {i//60} min")
             time.sleep(1)
-        st.success("⏰ Done! Take a break.")
+    except KeyboardInterrupt:
+        print("Timer interrupted.")
+    end_time = datetime.datetime.now()
+    st.timer_sessions.append((start_time, end_time))
+    print("⏰ Session complete!")
 
-# --- Daily Random Challenge ---
-st.subheader("📌 Daily Random Challenge")
-sheet_links = [
-    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
-    ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
-    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
-    ("Neetcode", "https://neetcode.io/"),
-    ("Blind 75", "https://blind75.io/")
-]
-rand = random.choice(sheet_links)
-st.info(f"Try something new from: [{rand[0]} 🔗]({rand[1]})")
+def export_log():
+    print("\n=== Exporting Log to CSV ===")
+    if st.log:
+        df = pd.DataFrame(st.log)
+        filename = "cp_log.csv"
+        df.to_csv(filename, index=False)
+        print(f"✅ Log exported to {filename}")
+    else:
+        print("❌ No data to export.")
 
-# --- Starred Notes Section ---
-if st.session_state.starred_notes:
-    st.subheader("⭐ Starred Notes")
-    for n in st.session_state.starred_notes[-5:]:
-        st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
+def settings():
+    print("\n=== Daily Random Challenge ===")
+    sheet_links = [
+        ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
+        ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
+        ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
+        ("Neetcode", "https://neetcode.io/"),
+        ("Blind 75", "https://blind75.io/")
+    ]
+    rand = random.choice(sheet_links)
+    print(f"Try something new from: {rand[0]} - {rand[1]}")
 
-# --- Motivational Quote ---
-quotes = [
-    "“Consistency is what transforms average into excellence.”",
-    "“The expert in anything was once a beginner.”",
-    "“Code more. Fear less.”",
-    "“Success is the sum of small efforts repeated daily.”"
-]
-st.success(f"💡 {random.choice(quotes)}")
+    quotes = [
+        "“Consistency is what transforms average into excellence.”",
+        "“The expert in anything was once a beginner.”",
+        "“Code more. Fear less.”",
+        "“Success is the sum of small efforts repeated daily.”"
+    ]
+    print("💡 Motivation: " + random.choice(quotes))
 
-# --- Footer ---
-st.markdown("---")
-st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True)
+def menu():
+    print("\n===== CP Tracker Console App =====")
+    print("1. Dashboard")
+    print("2. Daily Log")
+    print("3. Focus Mode")
+    print("4. Export Log")
+    print("5. Settings")
+    print("0. Exit")
+    return simulate_input("Choose an option:", "1")  # Default to Dashboard for sandbox runs
+
+# --- Main Loop ---
+for _ in range(1):  # Loop only once in sandboxed mode
+    choice = menu()
+    if choice == '1':
+        show_dashboard()
+    elif choice == '2':
+        add_daily_log()
+    elif choice == '3':
+        focus_mode()
+    elif choice == '4':
+        export_log()
+    elif choice == '5':
+        settings()
+    elif choice == '0':
+        print("Exiting app. Bye!")
+        break
+    else:
+        print("Invalid choice. Try again.")
