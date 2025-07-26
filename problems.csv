@@ -1,11 +1,11 @@
-import pandas as pd
-import streamlit as st
-
-uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
-
-if uploaded_file:
-    problems = pd.read_csv(uploaded_file)
-    st.dataframe(problems)
-else:
-    st.warning("Please upload the problems CSV file.")
-
+no, Problem,Link,Status 
+Two Sum,https://leetcode.com/problems/two-sum,False
+Reverse Linked List,https://leetcode.com/problems/reverse-linked-list,False
+Merge Two Sorted Lists,https://leetcode.com/problems/merge-two-sorted-lists,False
+Best Time to Buy and Sell Stock,https://leetcode.com/problems/best-time-to-buy-and-sell-stock,False
+Valid Parentheses,https://leetcode.com/problems/valid-parentheses,False
+Detect Cycle in Linked List,https://leetcode.com/problems/linked-list-cycle,False
+Sort Colors,https://leetcode.com/problems/sort-colors,False
+Majority Element,https://leetcode.com/problems/majority-element,False
+Valid Anagram,https://leetcode.com/problems/valid-anagram,False
+Binary Search,https://leetcode.com/problems/binary-search,False
