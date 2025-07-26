@@ -1,10 +1,11 @@
-# streamlit_app.py (Updated with 100 Individual Trackable Problems)
+# streamlit_app.py
 
 import streamlit as st
 import pandas as pd
 import datetime
+from random import sample
 
-st.set_page_config(page_title="Competitive Programming Tracker", layout="wide")
+st.set_page_config(page_title="CP Tracker", layout="wide")
 
 # ---------------------- DARK MODE CSS --------------------- #
 dark_css = """
@@ -13,66 +14,65 @@ body {
   background-color: #0f1117;
   color: #ffffff;
 }
-
 section[data-testid="stSidebar"] {
   background-color: #161a25;
 }
-
 .stButton>button {
   background-color: #008080;
   color: white;
   border-radius: 5px;
   margin: 5px;
 }
-
 .stProgress>div>div>div>div {
   background-color: #00c2c2;
 }
-
 </style>
 """
 st.markdown(dark_css, unsafe_allow_html=True)
 
-# ---------------------- USER LOGIN ------------------------ #
-st.markdown("### 👋 Welcome, Samrudh2006")
-# Now directly show the rest of the app
-
-# ------------------ USER LOGGED IN VIEW ------------------ #
+# ---------------------- HEADER --------------------- #
 st.title("💻 Competitive Programming Tracker")
-st.subheader(f"👋 Welcome, {st.session_state.username}")
+st.subheader("👋 Welcome, Samrudh2006")
 
-# ------------------ SHEETS LINKS ------------------ #
+# ------------------ DSA SHEET LINKS ------------------ #
 st.sidebar.header("📚 DSA Sheets")
 st.sidebar.markdown("- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)")
 st.sidebar.markdown("- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)")
 st.sidebar.markdown("- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)")
-st.sidebar.markdown("- [Neetcode](https://neetcode.io/)")
+st.sidebar.markdown("- [Neetcode 150](https://neetcode.io/)")
 st.sidebar.markdown("- [Blind 75](https://blind75.io/)")
 
-# ------------------ 100 PROBLEMS LIST ------------------ #
-problems_data = pd.read_csv("https://raw.githubusercontent.com/Samrudh2006/cp-problems-dataset/main/problems.csv")
+# ------------------ PROBLEM LIST ------------------ #
+st.header("🧠 Your 100 Practice Problems")
 
-st.subheader("🧠 Track 100 Problems")
+problems_data = [
+    {"Problem Name": f"Problem {i+1}", "Link": "https://example.com", "Source": "Striver/Babbar/GFG"}
+    for i in range(100)
+]
+problems = pd.DataFrame(problems_data)
 
-if 'solved_problems' not in st.session_state:
-    st.session_state['solved_problems'] = []
+if 'solved' not in st.session_state:
+    st.session_state.solved = []
 
-for i, row in problems_data.iterrows():
-    col1, col2 = st.columns([0.05, 0.95])
-    with col1:
-        checked = st.checkbox("", key=row['Problem Name'], value=row['Problem Name'] in st.session_state['solved_problems'])
-        if checked and row['Problem Name'] not in st.session_state['solved_problems']:
-            st.session_state['solved_problems'].append(row['Problem Name'])
-        elif not checked and row['Problem Name'] in st.session_state['solved_problems']:
-            st.session_state['solved_problems'].remove(row['Problem Name'])
-    with col2:
-        st.markdown(f"[{row['Problem Name']}]({row['Link']}) — `{row['Source']}`")
+solved = st.multiselect("✅ Mark problems as solved", problems['Problem Name'], default=st.session_state.solved)
+st.session_state.solved = solved
 
-progress = len(st.session_state['solved_problems']) / len(problems_data)
-st.progress(progress)
-st.write(f"✅ {len(st.session_state['solved_problems'])} / {len(problems_data)} problems solved")
+st.progress(len(solved) / len(problems))
+st.write(f"**{len(solved)} / {len(problems)} problems solved**")
 
-# ------------------ DAILY STREAK TRACKER ------------------ #
+with st.expander("📄 View All Problems"):
+    st.dataframe(problems[['Problem Name', 'Link', 'Source']], use_container_width=True)
+
+# ------------------ GOAL SETTING ------------------ #
+st.header("🎯 Weekly Goal")
+if 'goal' not in st.session_state:
+    st.session_state.goal = 10
+
+goal = st.slider("Set your weekly goal (problems)", 5, 100, st.session_state.goal)
+st.session_state.goal = goal
+st.write(f"🎯 Your weekly goal is to solve **{goal}** problems!")
+
+# ------------------ DAILY TRACKER ------------------ #
 st.header("🔥 Daily Tracker")
 today = datetime.date.today()
 log = st.session_state.get('log', [])
@@ -85,7 +85,7 @@ with st.form("daily_log"):
     if submitted:
         log.append({'Date': date, 'Solved': count, 'Notes': notes})
         st.session_state['log'] = log
-        st.success("Entry added!")
+        st.success("✅ Entry added!")
 
 if log:
     df = pd.DataFrame(log)
@@ -95,4 +95,4 @@ if log:
 
 # ------------------ FOOTER ------------------ #
 st.markdown("---")
-st.markdown("Created with ❤️ by [Samrudh](https://github.com/Samrudh2006)")
+st.markdown("Created with ❤️ by [Samrudh2006](https://github.com/Samrudh2006)")
