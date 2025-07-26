@@ -3,7 +3,6 @@ import pandas as pd
 import datetime
 import random
 import time
-import matplotlib.pyplot as plt
 
 # --- Page Setup ---
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
@@ -15,10 +14,6 @@ if "log" not in st.session_state:
     st.session_state.log = []
 if "starred_notes" not in st.session_state:
     st.session_state.starred_notes = []
-if "timer_sessions" not in st.session_state:
-    st.session_state.timer_sessions = []
-if "topics" not in st.session_state:
-    st.session_state.topics = {}
 
 # --- Sidebar Theme Toggle ---
 theme = st.sidebar.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
@@ -55,7 +50,6 @@ with st.form("log_form"):
     date = st.date_input("📅 Date", value=datetime.date.today())
     count = st.number_input("🔢 Problems Solved", min_value=0)
     notes = st.text_area("📝 Notes")
-    topic_tags = st.text_input("🏷️ Tags (comma separated)", placeholder="e.g., arrays, dp, trees")
     starred = st.checkbox("⭐ Mark as Important")
     submitted = st.form_submit_button("Add Entry")
     if submitted:
@@ -63,9 +57,6 @@ with st.form("log_form"):
         st.session_state.log.append(entry)
         if starred:
             st.session_state.starred_notes.append(entry)
-        if topic_tags:
-            for tag in [t.strip() for t in topic_tags.split(",")]:
-                st.session_state.topics[tag] = st.session_state.topics.get(tag, 0) + count
         st.success("Log Added!")
 
 if st.session_state.log:
@@ -82,42 +73,16 @@ solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_dateti
 st.progress(min(solved_this_week / weekly_goal, 1.0))
 st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
 
-# --- Progress Badge ---
-st.markdown("### 🏅 Achievement Badge")
-if solved_this_week >= weekly_goal:
-    st.success("🎉 Excellent! You've met your weekly goal!")
-elif solved_this_week >= weekly_goal * 0.75:
-    st.info("💪 Almost there! Keep going!")
-else:
-    st.warning("🚀 Push a little more to hit your weekly target!")
-
-# --- Pomodoro Timer + Logging ---
+# --- Pomodoro Timer ---
 st.subheader("⏱️ Focus Mode (Pomodoro)")
 timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
 if st.button("▶️ Start Timer"):
-    start_time = datetime.datetime.now()
     with st.empty():
         for i in range(timer_min * 60, 0, -1):
             m, s = divmod(i, 60)
             st.metric("Time Left", f"{m:02d}:{s:02d}")
             time.sleep(1)
-    end_time = datetime.datetime.now()
-    st.session_state.timer_sessions.append((start_time, end_time))
-    st.success("⏰ Done! Take a break.")
-
-if st.session_state.timer_sessions:
-    st.markdown("### ⌛ Past Focus Sessions")
-    for idx, (start, end) in enumerate(st.session_state.timer_sessions[-5:], 1):
-        duration = end - start
-        st.write(f"{idx}. {start.strftime('%H:%M:%S')} - {end.strftime('%H:%M:%S')} ({duration})")
-
-# --- Topic Distribution Pie Chart ---
-if st.session_state.topics:
-    st.subheader("📊 Most Solved Topics")
-    fig, ax = plt.subplots()
-    ax.pie(st.session_state.topics.values(), labels=st.session_state.topics.keys(), autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
-    st.pyplot(fig)
+        st.success("⏰ Done! Take a break.")
 
 # --- Daily Random Challenge ---
 st.subheader("📌 Daily Random Challenge")
@@ -136,13 +101,6 @@ if st.session_state.starred_notes:
     st.subheader("⭐ Starred Notes")
     for n in st.session_state.starred_notes[-5:]:
         st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
-
-# --- Export Log to CSV ---
-if st.session_state.log:
-    st.subheader("📤 Export Your Log")
-    df = pd.DataFrame(st.session_state.log)
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇️ Download Log as CSV", data=csv, file_name="cp_log.csv", mime="text/csv")
 
 # --- Motivational Quote ---
 quotes = [
