@@ -3,160 +3,124 @@ import pandas as pd
 import datetime
 import random
 import time
+from PIL import Image
 
-# --- Page Setup ---
+# Page setup
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
 
-# --- Session State ---
+# Initialize session state
 if "user_name" not in st.session_state:
     st.session_state.user_name = ""
-if "log" not in st.session_state:
-    st.session_state.log = []
-if "starred_notes" not in st.session_state:
-    st.session_state.starred_notes = []
+if "profile_pic" not in st.session_state:
+    st.session_state.profile_pic = None
+if "page" not in st.session_state:
+    st.session_state.page = "DSA Tracker"
 
-# --- Custom CSS for Modern UI ---
-st.markdown("""
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .title {
-            font-size: 48px;
-            font-weight: 700;
-            text-align: center;
-            color: #007BFF;
-            margin-bottom: 10px;
-        }
-        .sub {
-            text-align: center;
-            font-size: 18px;
-            color: gray;
-        }
-        .section-title {
-            font-size: 26px;
-            margin-top: 40px;
-            margin-bottom: 10px;
-            color: #007BFF;
-            font-weight: 600;
-        }
-        .card {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 15px;
-        }
-        .nav-menu {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .nav-button {
-            background-color: #007BFF;
-            color: white !important;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: background-color 0.3s;
-            display: inline-block;
-        }
-        .nav-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+# ---------------- Sidebar ----------------
+with st.sidebar.form("profile_form"):
+    st.markdown("### 👤 Enter Profile Details")
+    name_input = st.text_input("Your Name", value=st.session_state.user_name)
+    profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
+    submitted = st.form_submit_button("Submit")
 
-    <div class="nav-menu">
-        <a href="#log" class="nav-button">📘 Log</a>
-        <a href="#goal" class="nav-button">🎯 Goals</a>
-        <a href="#timer" class="nav-button">⏱️ Pomodoro</a>
-        <a href="#challenge" class="nav-button">📌 Challenge</a>
-        <a href="#notes" class="nav-button">📝 Starred Notes</a>
-    </div>
-""", unsafe_allow_html=True)
-
-# --- Sidebar Profile ---
-st.sidebar.header("👤 Your Profile")
-name_input = st.sidebar.text_input("Enter your name", value=st.session_state.user_name or "Coder")
-st.session_state.user_name = name_input or "Coder"
-
-profile_pic = st.sidebar.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-if profile_pic:
-    st.sidebar.image(profile_pic, width=120)
-else:
-    st.sidebar.image("https://avatars.githubusercontent.com/u/9919?s=200&v=4", width=120)
-
-# --- Main Header ---
-st.markdown(f"<div class='title'>🚀 Welcome, {st.session_state.user_name}!</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Track your daily progress, stay consistent, and become a better coder.</div>", unsafe_allow_html=True)
-
-# --- DSA Log Section ---
-st.markdown("<h2 id='log' class='section-title'>📘 Daily Practice Log</h2>", unsafe_allow_html=True)
-with st.form("log_form"):
-    date = st.date_input("📅 Date", value=datetime.date.today())
-    count = st.number_input("🔢 Problems Solved", min_value=0)
-    notes = st.text_area("📝 Notes", placeholder="What did you learn today?")
-    starred = st.checkbox("⭐ Mark as Important")
-    submitted = st.form_submit_button("✅ Add Entry")
     if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes}
-        st.session_state.log.append(entry)
-        if starred:
-            st.session_state.starred_notes.append(entry)
-        st.success("Entry added to log!")
+        st.session_state.user_name = name_input.strip() or "Coder"
+        st.session_state.profile_pic = profile_pic
+        st.success("✅ Profile Updated!")
 
-if st.session_state.log:
-    df = pd.DataFrame(st.session_state.log)
-    st.line_chart(df.set_index("Date")["Solved"])
-    with st.expander("📜 View All Logs"):
-        st.dataframe(df)
+if st.session_state.user_name:
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.session_state.profile_pic:
+            img = Image.open(st.session_state.profile_pic)
+            st.image(img, width=50)
+        else:
+            st.image("https://cdn-icons-png.flaticon.com/512/149/149071.png", width=50)
+    with col2:
+        st.markdown(f"**{st.session_state.user_name}**")
+    st.markdown("---")
 
-# --- Weekly Goal Section ---
-st.markdown("<h2 id='goal' class='section-title'>🎯 Weekly Goal</h2>", unsafe_allow_html=True)
-weekly_goal = st.slider("Set your weekly goal", 0, 70, 35)
-this_week = datetime.date.today().isocalendar()[1]
-solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week)
-st.progress(min(solved_this_week / weekly_goal, 1.0))
-st.info(f"✅ {solved_this_week} / {weekly_goal} problems solved this week")
-
-# --- Pomodoro Timer ---
-st.markdown("<h2 id='timer' class='section-title'>⏱️ Focus Mode (Pomodoro)</h2>", unsafe_allow_html=True)
-timer_min = st.selectbox("Select Focus Duration (minutes)", [15, 25, 45])
-if st.button("▶️ Start Focus Timer"):
-    with st.empty():
-        for i in range(timer_min * 60, 0, -1):
-            m, s = divmod(i, 60)
-            st.metric("Time Left", f"{m:02d}:{s:02d}")
-            time.sleep(1)
-        st.success("🎉 Time's up! Take a break.")
-
-# --- Random Challenge ---
-st.markdown("<h2 id='challenge' class='section-title'>📌 Daily Random Challenge</h2>", unsafe_allow_html=True)
-sheet_links = [
-    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
-    ("Love Babbar Sheet", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
-    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
-    ("Neetcode", "https://neetcode.io/"),
-    ("Blind 75", "https://blind75.io/")
+st.markdown("### 📂 Menu")
+pages = [
+    "DSA Tracker",
+    "Submissions",
+    "Progress",
+    "Problems",
+    "Discuss",
+    "Contests",
+    "Daily Goals",
+    "Notebook",
+    "Try New Features",
+    "Settings",
+    "Sign Out"
 ]
-rand = random.choice(sheet_links)
-st.info(f"🎲 Today's suggestion: [{rand[0]} 🔗]({rand[1]})")
-
-# --- Starred Notes ---
-if st.session_state.starred_notes:
-    st.markdown("<h2 id='notes' class='section-title'>⭐ Starred Notes</h2>", unsafe_allow_html=True)
-    for note in reversed(st.session_state.starred_notes[-5:]):
-        st.markdown(f"""
-        <div class="card">
-            <strong>{note['Date']}</strong><br>
-            ✍️ {note['Notes']}<br>
-            ✅ Solved: {note['Solved']} problems
-        </div>
-        """, unsafe_allow_html=True)
-
-# --- Footer ---
+choice = st.radio("", pages, index=pages.index(st.session_state.page))
+st.session_state.page = choice
 st.markdown("---")
-st.markdown("<center style='color: gray;'>Built with ❤️ using Streamlit | Stay consistent, coder!</center>", unsafe_allow_html=True)
+
+theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
+if theme == "🌙 Dark":
+    st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+
+st.header("📚 DSA Sheets")
+st.markdown("""
+- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)
+- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)
+- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)
+- [Neetcode](https://neetcode.io/)
+- [Blind 75](https://blind75.io/)
+""")
+
+# ---------------- Main Content ----------------
+st.title(f"📊 {st.session_state.page}")
+
+if st.session_state.page == "DSA Tracker":
+    st.markdown("Welcome to your personalized coding progress dashboard.")
+    # ... insert tracker widgets here ...
+
+elif st.session_state.page == "Submissions":
+    st.write("📝 Your Submissions")
+    # ... insert submissions view here ...
+
+elif st.session_state.page == "Progress":
+    st.write("📈 Your Progress Charts")
+    # ... insert progress analysis widgets here ...
+
+elif st.session_state.page == "Problems":
+    st.write("📚 Problem Bank")
+    # ... link to problem lists or filters ...
+
+elif st.session_state.page == "Discuss":
+    st.write("💬 Discussion Forums (external links)")
+    st.markdown("- [GeeksforGeeks Forum](https://discuss.geeksforgeeks.org/)\n- [Stack Overflow](https://stackoverflow.com/)")
+
+elif st.session_state.page == "Contests":
+    st.write("🏆 Upcoming Contests")
+    # ... display contest info (static or API-based) ...
+
+elif st.session_state.page == "Daily Goals":
+    st.write("🎯 Set and track your daily/weekly goals")
+    # ... include goal tracker UI ...
+
+elif st.session_state.page == "Notebook":
+    st.write("📝 Your Notes & Flashcards")
+    # ... integrate notebook space ...
+
+elif st.session_state.page == "Try New Features":
+    st.write("🧪 Explore upcoming or beta features:")
+    # ... list new features toggle or roadmap ...
+
+elif st.session_state.page == "Settings":
+    st.write("⚙️ Settings")
+    # ... include theme choice, profile reset, export preferences ...
+
+elif st.session_state.page == "Sign Out":
+    st.write("🚪 Signing out...")
+    st.session_state.user_name = ""
+    st.session_state.profile_pic = None
+    st.session_state.page = "DSA Tracker"
+    st.experimental_rerun()
+
+# ---------------- Footer ----------------
+st.markdown("---")
+st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True)
