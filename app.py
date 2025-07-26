@@ -1,108 +1,110 @@
+# streamlit_app.py (Updated with 100 Individual Trackable Problems)
+
 import streamlit as st
 import pandas as pd
 import datetime
-import os
 
 st.set_page_config(page_title="Competitive Programming Tracker", layout="wide")
 
-# --- Header ---
+# ---------------------- DARK MODE CSS --------------------- #
+dark_css = """
+<style>
+body {
+  background-color: #0f1117;
+  color: #ffffff;
+}
+
+section[data-testid="stSidebar"] {
+  background-color: #161a25;
+}
+
+.stButton>button {
+  background-color: #008080;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.stProgress>div>div>div>div {
+  background-color: #00c2c2;
+}
+
+</style>
+"""
+st.markdown(dark_css, unsafe_allow_html=True)
+
+# ---------------------- USER LOGIN ------------------------ #
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("🔐 Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type='password')
+    if st.button("Login"):
+        if username != "" and password != "":
+            st.session_state.logged_in = True
+            st.session_state.username = username
+        else:
+            st.error("Please enter both username and password")
+    st.stop()
+
+# ------------------ USER LOGGED IN VIEW ------------------ #
 st.title("💻 Competitive Programming Tracker")
-st.markdown("Track your DSA journey and maintain your daily streaks like a pro!")
+st.subheader(f"👋 Welcome, {st.session_state.username}")
 
-# --- Sidebar: User Profile ---
-st.sidebar.title("👤 User Profile")
-st.sidebar.text_input("Name", key="name")
-st.sidebar.text_input("Email", key="email")
-st.sidebar.date_input("Start Date", key="start_date")
+# ------------------ SHEETS LINKS ------------------ #
+st.sidebar.header("📚 DSA Sheets")
+st.sidebar.markdown("- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)")
+st.sidebar.markdown("- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)")
+st.sidebar.markdown("- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)")
+st.sidebar.markdown("- [Neetcode](https://neetcode.io/)")
+st.sidebar.markdown("- [Blind 75](https://blind75.io/)")
 
-# --- Load problems from DSA sheet (example simulated dataset) ---
-if "dsa_problems" not in st.session_state:
-    st.session_state.dsa_problems = pd.DataFrame({
-        "Problem": ["Two Sum", "Reverse Linked List", "Merge Intervals", "LRU Cache", "Max Subarray"],
-        "Source": ["Striver", "Babbar", "Striver", "GFG", "Babbar"],
-        "Link": [
-            "https://leetcode.com/problems/two-sum/",
-            "https://leetcode.com/problems/reverse-linked-list/",
-            "https://leetcode.com/problems/merge-intervals/",
-            "https://practice.geeksforgeeks.org/problems/lru-cache/1",
-            "https://leetcode.com/problems/maximum-subarray/"
-        ],
-        "Solved": [False]*5
-    })
+# ------------------ 100 PROBLEMS LIST ------------------ #
+problems_data = pd.read_csv("https://raw.githubusercontent.com/Samrudh2006/cp-problems-dataset/main/problems.csv")
 
-# --- Daily Log Form ---
-st.subheader("📅 Daily Problem Log")
+st.subheader("🧠 Track 100 Problems")
 
-if "log" not in st.session_state:
-    st.session_state.log = []
+if 'solved_problems' not in st.session_state:
+    st.session_state['solved_problems'] = []
 
-with st.form("log_form"):
-    date = st.date_input("Date", value=datetime.date.today())
-    problems_solved = st.number_input("Problems Solved", min_value=0, max_value=100)
-    notes = st.text_input("Notes")
+for i, row in problems_data.iterrows():
+    col1, col2 = st.columns([0.05, 0.95])
+    with col1:
+        checked = st.checkbox("", key=row['Problem Name'], value=row['Problem Name'] in st.session_state['solved_problems'])
+        if checked and row['Problem Name'] not in st.session_state['solved_problems']:
+            st.session_state['solved_problems'].append(row['Problem Name'])
+        elif not checked and row['Problem Name'] in st.session_state['solved_problems']:
+            st.session_state['solved_problems'].remove(row['Problem Name'])
+    with col2:
+        st.markdown(f"[{row['Problem Name']}]({row['Link']}) — `{row['Source']}`")
+
+progress = len(st.session_state['solved_problems']) / len(problems_data)
+st.progress(progress)
+st.write(f"✅ {len(st.session_state['solved_problems'])} / {len(problems_data)} problems solved")
+
+# ------------------ DAILY STREAK TRACKER ------------------ #
+st.header("🔥 Daily Tracker")
+today = datetime.date.today()
+log = st.session_state.get('log', [])
+
+with st.form("daily_log"):
+    date = st.date_input("Date", value=today)
+    count = st.number_input("Problems Solved Today", min_value=0, max_value=100, step=1)
+    notes = st.text_area("Any Notes")
     submitted = st.form_submit_button("Add Entry")
     if submitted:
-        st.session_state.log.append({"Date": date, "Solved": problems_solved, "Notes": notes})
-        st.success("Entry added successfully!")
+        log.append({'Date': date, 'Solved': count, 'Notes': notes})
+        st.session_state['log'] = log
+        st.success("Entry added!")
 
-# --- Streak and Summary ---
-st.subheader("🔥 Streak & Summary")
-if st.session_state.log:
-    df = pd.DataFrame(st.session_state.log)
-    df_sorted = df.sort_values("Date")
-    df_sorted["Date"] = pd.to_datetime(df_sorted["Date"])
-    df_sorted = df_sorted.drop_duplicates("Date", keep="last")
-    df_sorted = df_sorted.reset_index(drop=True)
+if log:
+    df = pd.DataFrame(log)
+    st.line_chart(df.set_index('Date')['Solved'])
+    with st.expander("📘 Daily Log Table"):
+        st.dataframe(df)
 
-    streak = 1
-    for i in range(len(df_sorted)-1, 0, -1):
-        delta = (df_sorted.loc[i, "Date"] - df_sorted.loc[i-1, "Date"]).days
-        if delta == 1:
-            streak += 1
-        else:
-            break
-    st.metric(label="🔥 Current Streak (days)", value=streak)
-    st.bar_chart(df_sorted.set_index("Date")["Solved"])
-else:
-    st.info("No logs yet. Start adding your daily progress!")
-
-# --- Full Log Table ---
-st.subheader("📖 Full Problem Solving Log")
-if st.session_state.log:
-    st.dataframe(pd.DataFrame(st.session_state.log))
-
-# --- DSA Sheets Section ---
-st.subheader("📚 DSA Sheets (Striver, Babbar, GFG)")
-
-st.markdown("**🔗 [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)**")
-st.markdown("**🔗 [Love Babbar 450 Sheet (PDF)](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)**")
-st.markdown("**🔗 [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)**")
-st.markdown("**📥 [Download Excel Sheet with Problem Links](sandbox:/mnt/data/DSA_Sheets_Links.xlsx)**")
-
-# --- Problem Tracker ---
-st.subheader("✅ DSA Problem Progress Tracker")
-df_dsa = st.session_state.dsa_problems
-for i, row in df_dsa.iterrows():
-    df_dsa.at[i, "Solved"] = st.checkbox(f"{row['Problem']} ({row['Source']})", value=row["Solved"], key=f"solved_{i}")
-    st.markdown(f"[🔗 Open Problem]({row['Link']})")
-
-# --- Progress Bar ---
-total = len(df_dsa)
-solved = df_dsa["Solved"].sum()
-progress = int((solved / total) * 100)
-
-st.progress(progress / 100)
-st.success(f"{solved}/{total} problems solved! ({progress}%)")
-
-# --- Weekly/Daily Goal Setting ---
-st.subheader("🎯 Set Your Solving Goals")
-daily_goal = st.number_input("Daily Goal (problems)", value=2)
-weekly_goal = st.number_input("Weekly Goal (problems)", value=14)
-
-st.info(f"Try to solve {daily_goal} problems today and {weekly_goal} problems this week!")
-
-# --- Footer ---
-st.markdown("""
----
-Made with ❤️ by Samrudh. Powered by Streamlit.
-""")
+# ------------------ FOOTER ------------------ #
+st.markdown("---")
+st.markdown("Created with ❤️ by [Samrudh](https://github.com/Samrudh2006)")
