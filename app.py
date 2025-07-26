@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 import random
 import time
+import matplotlib.pyplot as plt
 
 # --- Page Setup ---
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
@@ -50,19 +51,25 @@ with st.form("log_form"):
     date = st.date_input("📅 Date", value=datetime.date.today())
     count = st.number_input("🔢 Problems Solved", min_value=0)
     notes = st.text_area("📝 Notes")
+    topic = st.selectbox("📚 Topic", ["Arrays", "Strings", "Linked List", "Trees", "Graphs", "DP", "Recursion", "Sorting", "Maths", "Other"])
     starred = st.checkbox("⭐ Mark as Important")
     submitted = st.form_submit_button("Add Entry")
     if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes}
+        entry = {"Date": date, "Solved": count, "Notes": notes, "Topic": topic}
         st.session_state.log.append(entry)
         if starred:
             st.session_state.starred_notes.append(entry)
-        st.success("Log Added!")
+        st.success("✅ Log Added!")
 
+# --- Log Display ---
 if st.session_state.log:
     df = pd.DataFrame(st.session_state.log)
+    df["Date"] = pd.to_datetime(df["Date"])
+    df.sort_values("Date", inplace=True)
+
     st.line_chart(df.set_index("Date")["Solved"])
-    with st.expander("📘 View Log"):
+
+    with st.expander("📘 View Log Data"):
         st.dataframe(df)
 
 # --- Weekly Goal Tracker ---
@@ -71,7 +78,29 @@ weekly_goal = st.slider("Set your goal", 0, 70, 35)
 this_week = datetime.date.today().isocalendar()[1]
 solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week)
 st.progress(min(solved_this_week / weekly_goal, 1.0))
-st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
+st.write(f"**✅ {solved_this_week} / {weekly_goal} solved this week**")
+
+# --- Streak Tracker ---
+st.subheader("🔥 Current Streak")
+dates = sorted([pd.to_datetime(i["Date"]).date() for i in st.session_state.log])
+streak = 0
+today = datetime.date.today()
+for i in range(len(dates)-1, -1, -1):
+    if (today - dates[i]).days == streak:
+        streak += 1
+    else:
+        break
+st.write(f"🔥 **You’ve been consistent for {streak} day(s) in a row!**")
+
+# --- Pie Chart for Topic Distribution ---
+if st.session_state.log:
+    st.subheader("📊 Topic Distribution")
+    topic_counts = pd.DataFrame(st.session_state.log)["Topic"].value_counts()
+    if not topic_counts.empty:
+        fig, ax = plt.subplots()
+        ax.pie(topic_counts, labels=topic_counts.index, autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')
+        st.pyplot(fig)
 
 # --- Pomodoro Timer ---
 st.subheader("⏱️ Focus Mode (Pomodoro)")
@@ -82,7 +111,7 @@ if st.button("▶️ Start Timer"):
             m, s = divmod(i, 60)
             st.metric("Time Left", f"{m:02d}:{s:02d}")
             time.sleep(1)
-        st.success("⏰ Done! Take a break.")
+        st.success("⏰ Done! Take a break!")
 
 # --- Daily Random Challenge ---
 st.subheader("📌 Daily Random Challenge")
@@ -101,59 +130,6 @@ if st.session_state.starred_notes:
     st.subheader("⭐ Starred Notes")
     for n in st.session_state.starred_notes[-5:]:
         st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
-
-# --- Motivational Quote ---
-quotes = [
-    "“Consistency is what transforms average into excellence.”",
-    "“The expert in anything was once a beginner.”",
-    "“Code more. Fear less.”",
-    "“Success is the sum of small efforts repeated daily.”"
-]
-st.success(f"💡 {random.choice(quotes)}")
-# --- Daily Random Challenge (Completed) ---
-sheet_links = [
-    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
-    ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
-    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
-    ("Neetcode", "https://neetcode.io/"),
-    ("Blind 75", "https://blind75.io/")
-]
-rand = random.choice(sheet_links)
-st.info(f"Try something new from: [{rand[0]} 🔗]({rand[1]})")
-
-# --- Starred Notes Section ---
-if st.session_state.starred_notes:
-    st.subheader("⭐ Starred Notes")
-    for n in st.session_state.starred_notes[-5:]:
-        st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
-
-# --- Streak Tracker ---
-st.subheader("🔥 Current Streak")
-dates = sorted([pd.to_datetime(i["Date"]).date() for i in st.session_state.log])
-streak = 0
-today = datetime.date.today()
-for i in range(len(dates)-1, -1, -1):
-    if (today - dates[i]).days == streak:
-        streak += 1
-    else:
-        break
-st.write(f"🔥 **You’ve been active for {streak} day(s) in a row!**")
-
-# --- Topic Pie Chart ---
-if st.session_state.log:
-    st.subheader("📊 Topic Distribution")
-    topic_counts = pd.DataFrame(st.session_state.log)["Topic"].value_counts()
-    fig, ax = plt.subplots()
-    ax.pie(topic_counts, labels=topic_counts.index, autopct='%1.1f%%')
-    ax.axis("equal")
-    st.pyplot(fig)
-
-# --- Export CSV ---
-if st.session_state.log:
-    st.subheader("📂 Export Log")
-    df = pd.DataFrame(st.session_state.log)
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download as CSV", csv, "cp_log.csv", "text/csv")
 
 # --- Flashcard Picker ---
 st.subheader("🧠 DSA Concept Flashcard")
@@ -174,11 +150,26 @@ tips = [
     "Practice one topic a week to build deep understanding.",
     "Build your own GitHub repo to track CP progress.",
     "Explain problems aloud after solving — it deepens retention!",
+    "Start timing your problems to simulate real contests."
 ]
 st.success(random.choice(tips))
 
+# --- Export Logs to CSV ---
+if st.session_state.log:
+    st.subheader("📂 Export Your Log")
+    df = pd.DataFrame(st.session_state.log)
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Download Log as CSV", csv, "cp_log.csv", "text/csv")
 
+# --- Motivational Quote ---
+quotes = [
+    "“Consistency is what transforms average into excellence.”",
+    "“The expert in anything was once a beginner.”",
+    "“Code more. Fear less.”",
+    "“Success is the sum of small efforts repeated daily.”"
+]
+st.success(f"💡 {random.choice(quotes)}")
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True) modify whitin this this code add some big code and give me some extra sections and some good options
+st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True)
