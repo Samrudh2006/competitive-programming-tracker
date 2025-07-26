@@ -18,19 +18,7 @@ if "log" not in st.session_state:
 if "starred_notes" not in st.session_state:
     st.session_state.starred_notes = []
 
-# --- Sidebar ---
-with st.sidebar:
-    # Profile form
-    with st.form("profile_form"):
-        st.markdown("### 👤 Enter Profile Details")
-        name_input = st.text_input("Your Name", value=st.session_state.user_name)
-        profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-        submitted = st.form_submit_button("Submit")
 
-        if submitted:
-            st.session_state.user_name = name_input.strip() or "Coder"
-            st.session_state.profile_pic = profile_pic
-            st.success("✅ Profile Updated!")
 
     # Display Profile
     if st.session_state.user_name:
