@@ -34,20 +34,8 @@ section[data-testid="stSidebar"] {
 st.markdown(dark_css, unsafe_allow_html=True)
 
 # ---------------------- USER LOGIN ------------------------ #
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    st.title("🔐 Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type='password')
-    if st.button("Login"):
-        if username != "" and password != "":
-            st.session_state.logged_in = True
-            st.session_state.username = username
-        else:
-            st.error("Please enter both username and password")
-    st.stop()
+st.markdown("### 👋 Welcome, Samrudh2006")
+# Now directly show the rest of the app
 
 # ------------------ USER LOGGED IN VIEW ------------------ #
 st.title("💻 Competitive Programming Tracker")
