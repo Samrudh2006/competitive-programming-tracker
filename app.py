@@ -1,4 +1,4 @@
-# streamlit_app.py (Redesigned UI with Theme Toggle, Profile, and Advanced Tracking)
+# streamlit_app.py (Original UI with Improvements, No Login, Samrudh Name Removed)
 
 import streamlit as st
 import pandas as pd
@@ -6,6 +6,24 @@ import datetime
 from random import sample
 
 st.set_page_config(page_title="CP Tracker", layout="wide")
+
+# ------------------ User Info ------------------ #
+st.sidebar.header("👤 My Profile")
+name = st.sidebar.text_input("Enter your name", value="")
+profile_pic = st.sidebar.file_uploader("Upload Profile Picture", type=["jpg", "png"])
+
+if profile_pic:
+    st.sidebar.image(profile_pic, width=100)
+else:
+    st.sidebar.image("https://avatars.githubusercontent.com/u/9919?s=200&v=4", width=100)
+
+# ------------------ Sheet Links ------------------ #
+st.sidebar.header("📚 DSA Sheets")
+st.sidebar.markdown("- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)")
+st.sidebar.markdown("- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)")
+st.sidebar.markdown("- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)")
+st.sidebar.markdown("- [Neetcode](https://neetcode.io/)")
+st.sidebar.markdown("- [Blind 75](https://blind75.io/)")
 
 # ------------------ Theme Toggle ------------------ #
 theme_mode = st.sidebar.radio("Choose Theme", ["🌞 Light", "🌙 Dark"])
@@ -31,29 +49,6 @@ if theme_mode == "🌙 Dark":
     """
     st.markdown(dark_css, unsafe_allow_html=True)
 
-# ------------------ User Info ------------------ #
-st.sidebar.header("👤 My Profile")
-name = st.sidebar.text_input("Enter your name")
-profile_pic = st.sidebar.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-
-if profile_pic:
-    st.sidebar.image(profile_pic, width=100)
-else:
-    default_pics = [
-        "https://i.imgur.com/jT0XqfT.png",
-        "https://i.imgur.com/C7cPlMi.png",
-        "https://i.imgur.com/8Km9tLL.png"
-    ]
-    st.sidebar.image(sample(default_pics, 1)[0], width=100)
-
-# ------------------ Sheet Links ------------------ #
-st.sidebar.header("📚 DSA Sheets")
-st.sidebar.markdown("- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)")
-st.sidebar.markdown("- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)")
-st.sidebar.markdown("- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)")
-st.sidebar.markdown("- [Neetcode](https://neetcode.io/)")
-st.sidebar.markdown("- [Blind 75](https://blind75.io/)")
-
 # ------------------ Main UI ------------------ #
 st.title("🚀 Competitive Programming Tracker")
 if name:
@@ -62,21 +57,17 @@ if name:
 # ------------------ Load Problems ------------------ #
 st.header("🧠 Random 100 CP Problems")
 problems = pd.read_csv("https://raw.githubusercontent.com/Samrudh2006/cp-problems-dataset/main/problems.csv")
-random_100 = problems.sample(n=100).reset_index(drop=True)
+random_100 = problems.sample(n=100)
 
-if 'solved' not in st.session_state:
-    st.session_state.solved = []
+solved = st.multiselect("✅ Tick solved problems:", random_100['Problem Name'])
+st.progress(len(solved)/100)
+st.write(f"**{len(solved)} / 100 problems solved**")
 
-for i, row in random_100.iterrows():
-    key = f"chk_{i}"
-    is_solved = st.checkbox(f"{row['Problem Name']}", key=key)
-    if is_solved and row['Problem Name'] not in st.session_state.solved:
-        st.session_state.solved.append(row['Problem Name'])
-    elif not is_solved and row['Problem Name'] in st.session_state.solved:
-        st.session_state.solved.remove(row['Problem Name'])
-
-st.progress(len(st.session_state.solved)/100)
-st.write(f"**{len(st.session_state.solved)} / 100 problems solved**")
+with st.expander("📄 View Problem List"):
+    for index, row in random_100.iterrows():
+        st.markdown(f"**🔹 {row['Problem Name']}**")
+        st.markdown(f"[🔗 Go to Problem]({row['Link']})")
+        st.markdown("---")
 
 # ------------------ Daily Tracker ------------------ #
 st.header("🔥 Daily Problem Tracker")
