@@ -110,6 +110,74 @@ quotes = [
     "“Success is the sum of small efforts repeated daily.”"
 ]
 st.success(f"💡 {random.choice(quotes)}")
+# --- Daily Random Challenge (Completed) ---
+sheet_links = [
+    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
+    ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
+    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
+    ("Neetcode", "https://neetcode.io/"),
+    ("Blind 75", "https://blind75.io/")
+]
+rand = random.choice(sheet_links)
+st.info(f"Try something new from: [{rand[0]} 🔗]({rand[1]})")
+
+# --- Starred Notes Section ---
+if st.session_state.starred_notes:
+    st.subheader("⭐ Starred Notes")
+    for n in st.session_state.starred_notes[-5:]:
+        st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
+
+# --- Streak Tracker ---
+st.subheader("🔥 Current Streak")
+dates = sorted([pd.to_datetime(i["Date"]).date() for i in st.session_state.log])
+streak = 0
+today = datetime.date.today()
+for i in range(len(dates)-1, -1, -1):
+    if (today - dates[i]).days == streak:
+        streak += 1
+    else:
+        break
+st.write(f"🔥 **You’ve been active for {streak} day(s) in a row!**")
+
+# --- Topic Pie Chart ---
+if st.session_state.log:
+    st.subheader("📊 Topic Distribution")
+    topic_counts = pd.DataFrame(st.session_state.log)["Topic"].value_counts()
+    fig, ax = plt.subplots()
+    ax.pie(topic_counts, labels=topic_counts.index, autopct='%1.1f%%')
+    ax.axis("equal")
+    st.pyplot(fig)
+
+# --- Export CSV ---
+if st.session_state.log:
+    st.subheader("📂 Export Log")
+    df = pd.DataFrame(st.session_state.log)
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Download as CSV", csv, "cp_log.csv", "text/csv")
+
+# --- Flashcard Picker ---
+st.subheader("🧠 DSA Concept Flashcard")
+flashcards = {
+    "Two Pointer": "Efficient for searching pairs/triples in sorted arrays.",
+    "Sliding Window": "For subarrays/substrings of size k or with some constraint.",
+    "Backtracking": "Try all combinations, but prune invalid ones early.",
+    "Dynamic Programming": "Optimal substructure + overlapping subproblems.",
+    "Binary Search": "Used in sorted arrays or to minimize/maximize answers."
+}
+selected = st.selectbox("Choose a concept", list(flashcards.keys()))
+st.info(flashcards[selected])
+
+# --- Bonus Tip Section ---
+st.subheader("💡 Bonus Coding Tip")
+tips = [
+    "Use Leetcode Discuss for hints before seeing full solutions.",
+    "Practice one topic a week to build deep understanding.",
+    "Build your own GitHub repo to track CP progress.",
+    "Explain problems aloud after solving — it deepens retention!",
+]
+st.success(random.choice(tips))
+
+
 
 # --- Footer ---
 st.markdown("---")
