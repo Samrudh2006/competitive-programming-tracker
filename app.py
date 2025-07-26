@@ -78,38 +78,6 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Profile ---
-
-st.markdown("## 👤 Profile Setup")
-
-if not st.session_state.submitted:
-    with st.form("profile_form"):
-        col1, col2 = st.columns([1, 3])
-        
-        with col1:
-            uploaded_file = st.file_uploader("Upload Profile Picture", type=["jpg", "jpeg", "png"])
-        
-        with col2:
-            name = st.text_input("Enter Your Name")
-        
-        submit = st.form_submit_button("Submit")
-
-        if submit:
-            if name and uploaded_file:
-                st.session_state.name = name
-                st.session_state.uploaded_file = uploaded_file
-                st.session_state.submitted = True
-            else:
-                st.warning("Please upload a picture and enter your name.")
-else:
-    # Display submitted profile
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        st.image(st.session_state.uploaded_file, width=100)
-    with col2:
-        st.markdown(f"### 👋 Hello, **{st.session_state.name}**!")
-
-    st.success("✅ Profile submitted successfully!")
 
 # --- Main Header ---
 st.markdown(f"<div class='title'>🚀 Welcome, {st.session_state.user_name}!</div>", unsafe_allow_html=True)
