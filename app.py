@@ -21,13 +21,22 @@ if theme == "🌙 Dark":
     st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
 
 # --- User Profile ---
-st.sidebar.header("👤 Profile")
-name_input = st.sidebar.text_input("Enter your name", value=st.session_state.user_name or "Coder")
-st.session_state.user_name = name_input or "Coder"
 
-profile_pic = st.sidebar.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-if profile_pic:
-    st.sidebar.image(profile_pic, width=100)
+# --- User Profile Submission ---
+with st.sidebar.form("profile_form"):
+    st.header("👤 Profile")
+    name_input = st.text_input("Enter your name", value=st.session_state.user_name)
+    profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
+    submitted = st.form_submit_button("Submit")
+
+    if submitted:
+        st.session_state.user_name = name_input or "Coder"
+        st.session_state.profile_pic = profile_pic
+        st.success("✅ Profile submitted!")
+
+# --- Show Submitted Info ---
+if "profile_pic" in st.session_state and st.session_state.profile_pic:
+    st.sidebar.image(st.session_state.profile_pic, width=100)
 else:
     st.sidebar.image("https://avatars.githubusercontent.com/u/9919?s=200&v=4", width=100)
 
