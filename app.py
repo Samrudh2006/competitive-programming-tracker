@@ -157,4 +157,10 @@ st.success(f"💡 {random.choice(quotes)}")
 
 # Footer
 st.markdown("---")
-st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True)
+st.markdown("""
+<center style='color: gray;'>
+Built with ❤️ using Streamlit | Stay consistent, coder!<br><br>
+👨‍💻 Created by <b>Dwivedula Venkata Satya Samrudh</b>
+</center>
+""", unsafe_allow_html=True)
+
