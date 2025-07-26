@@ -6,6 +6,48 @@ import time
 
 # --- Page Setup ---
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
+import streamlit as st
+from PIL import Image
+
+# Sidebar layout
+with st.sidebar:
+    # --- Profile Submission Form ---
+    with st.form("profile_form"):
+        st.markdown("### 👤 Enter Profile Details")
+        name_input = st.text_input("Your Name", value=st.session_state.get("user_name", ""))
+        profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
+        submitted = st.form_submit_button("Submit")
+
+        if submitted:
+            st.session_state.user_name = name_input.strip() or "Coder"
+            st.session_state.profile_pic = profile_pic
+
+    # --- Display Profile after Submission ---
+    if "user_name" in st.session_state:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if "profile_pic" in st.session_state and st.session_state.profile_pic:
+                img = Image.open(st.session_state.profile_pic)
+                st.image(img, width=50)
+            else:
+                st.image("https://cdn-icons-png.flaticon.com/512/149/149071.png", width=50)  # default icon
+        with col2:
+            st.markdown(f"**{st.session_state.user_name}**")
+        st.markdown("---")
+
+    # --- App Menu (Styled Like LeetCode) ---
+    st.markdown("### 📂 Menu")
+    st.markdown("📊 [DSA Tracker](#dsa-tracker)")
+    st.markdown("📘 [Submissions](#submissions)")
+    st.markdown("📈 [Progress](#progress)")
+    st.markdown("📚 [Problems](#problems)")
+    st.markdown("💬 [Discuss](#discuss)")
+    st.markdown("🏆 [Contests](#contests)")
+    st.markdown("🎯 [Daily Goals](#daily-goals)")
+    st.markdown("📝 [Notebook](#notebook)")
+    st.markdown("🧪 [Try New Features](#try-new-features)")
+    st.markdown("⚙️ [Settings](#settings)")
+    st.markdown("🚪 [Sign Out](#sign-out)")
 
 # --- Session State Setup ---
 if "user_name" not in st.session_state:
