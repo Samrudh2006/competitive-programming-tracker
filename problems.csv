@@ -1,11 +1,101 @@
-no, Problem,Link,Status 
-Two Sum,https://leetcode.com/problems/two-sum,False
-Reverse Linked List,https://leetcode.com/problems/reverse-linked-list,False
-Merge Two Sorted Lists,https://leetcode.com/problems/merge-two-sorted-lists,False
-Best Time to Buy and Sell Stock,https://leetcode.com/problems/best-time-to-buy-and-sell-stock,False
-Valid Parentheses,https://leetcode.com/problems/valid-parentheses,False
-Detect Cycle in Linked List,https://leetcode.com/problems/linked-list-cycle,False
-Sort Colors,https://leetcode.com/problems/sort-colors,False
-Majority Element,https://leetcode.com/problems/majority-element,False
-Valid Anagram,https://leetcode.com/problems/valid-anagram,False
-Binary Search,https://leetcode.com/problems/binary-search,False
+ID,Topic,Difficulty,Problem Name,Link (Example),Description (Short)
+1,Arrays,Easy,Two Sum,https://leetcode.com/problems/two-sum/,Find two numbers that add up to a specific target.
+2,Arrays,Easy,Contains Duplicate,https://leetcode.com/problems/contains-duplicate/,Check if an array contains any duplicates.
+3,Arrays,Medium,Rotate Array,https://leetcode.com/problems/rotate-array/,Rotate an array to the right by k steps.
+4,Strings,Easy,Valid Anagram,https://leetcode.com/problems/valid-anagram/,Determine if two strings are anagrams of each other.
+5,Strings,Medium,Longest Palindromic Substring,https://leetcode.com/problems/longest-palindromic-substring/,Find the longest palindromic substring in a given string.
+6,Linked List,Easy,Reverse Linked List,https://leetcode.com/problems/reverse-linked-list/,Reverse a singly linked list.
+7,Linked List,Medium,Merge Two Sorted Lists,https://leetcode.com/problems/merge-two-sorted-lists/,Merge two sorted linked lists into one.
+8,Trees,Easy,Invert Binary Tree,https://leetcode.com/problems/invert-binary-tree/,Invert a binary tree.
+9,Trees,Medium,Binary Tree Level Order Traversal,https://leetcode.com/problems/binary-tree-level-order-traversal/,Perform level order traversal of a binary tree.
+10,Graphs,Medium,Number of Islands,https://leetcode.com/problems/number-of-islands/,Count the number of islands in a 2D grid.
+11,Graphs,Hard,Course Schedule,https://leetcode.com/problems/course-schedule/,Determine if a set of courses can be finished.
+12,Dynamic Programming,Medium,Fibonacci Number,https://leetcode.com/problems/fibonacci-number/,Calculate the nth Fibonacci number using DP.
+13,Dynamic Programming,Medium,Climbing Stairs,https://leetcode.com/problems/climbing-stairs/,Find the number of distinct ways to climb to the top of n stairs.
+14,Searching,Easy,Binary Search,https://leetcode.com/problems/binary-search/,Implement binary search.
+15,Sorting,Medium,Merge Sort,https://www.geeksforgeeks.org/merge-sort/,Implement Merge Sort algorithm.
+16,Sorting,Medium,Quick Sort,https://www.geeksforgeeks.org/quick-sort/,Implement Quick Sort algorithm.
+17,Hash Table,Easy,Two Sum,https://leetcode.com/problems/two-sum/,Revisit Two Sum with Hash Table for optimal solution.
+18,Stack,Easy,Valid Parentheses,https://leetcode.com/problems/valid-parentheses/,Check if a string of parentheses is valid.
+19,Queue,Medium,Implement Queue using Stacks,https://leetcode.com/problems/implement-queue-using-stacks/,Implement a queue's functionality using two stacks.
+20,Heaps,Medium,Kth Largest Element in an Array,https://leetcode.com/problems/kth-largest-element-in-an-array/,Find the kth largest element in an unsorted array.
+21,Backtracking,Medium,Subsets,https://leetcode.com/problems/subsets/,Generate all possible subsets of a set of distinct integers.
+22,Backtracking,Medium,Permutations,https://leetcode.com/problems/permutations/,Generate all possible permutations of a sequence.
+23,Greedy,Easy,Best Time to Buy and Sell Stock,https://leetcode.com/problems/best-time-to-buy-and-sell-stock/,Find the maximum profit from buying and selling stock.
+24,Greedy,Medium,Jump Game,https://leetcode.com/problems/jump-game/,Determine if you can reach the last index of an array.
+25,Math,Easy,Palindrome Number,https://leetcode.com/problems/palindrome-number/,Determine whether an integer is a palindrome.
+26,Math,Medium,Factorial Trailing Zeroes,https://leetcode.com/problems/factorial-trailing-zeroes/,Count the number of trailing zeroes in n!.
+27,Bit Manipulation,Easy,Number of 1 Bits,https://leetcode.com/problems/number-of-1-bits/,Count the number of set bits (1s) in an unsigned integer.
+28,Bit Manipulation,Medium,Single Number,https://leetcode.com/problems/single-number/,Find the single element that appears only once.
+29,Trie,Medium,Implement Trie (Prefix Tree),https://leetcode.com/problems/implement-trie-prefix-tree/,Implement a Trie data structure.
+30,Union Find,Medium,Number of Connected Components in an Undirected Graph,https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/,Count connected components in a graph using Union-Find.
+31,Sliding Window,Medium,Longest Substring Without Repeating Characters,https://leetcode.com/problems/longest-substring-without-repeating-characters/,Find the length of the longest substring without repeating characters.
+32,Sliding Window,Medium,Minimum Window Substring,https://leetcode.com/problems/minimum-window-substring/,Find the smallest substring in S that contains all characters of T.
+33,Two Pointers,Easy,Valid Palindrome,https://leetcode.com/problems/valid-palindrome/,Check if a string is a palindrome, ignoring non-alphanumeric characters.
+34,Two Pointers,Medium,3Sum,https://leetcode.com/problems/3sum/,Find all unique triplets in the array which gives the sum of zero.
+35,Graphs,Medium,Clone Graph,https://leetcode.com/problems/clone-graph/,Deep copy a graph.
+36,Trees,Medium,Validate Binary Search Tree,https://leetcode.com/problems/validate-binary-search-tree/,Determine if a binary tree is a valid BST.
+37,Dynamic Programming,Hard,Longest Common Subsequence,https://leetcode.com/problems/longest-common-subsequence/,Find the length of the longest common subsequence between two strings.
+38,Backtracking,Hard,N-Queens,https://leetcode.com/problems/n-queens/,Solve the N-Queens puzzle.
+39,Design,Medium,Min Stack,https://leetcode.com/problems/min-stack/,Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+40,Design,Medium,LRU Cache,https://leetcode.com/problems/lru-cache/,Design and implement a Least Recently Used (LRU) cache.
+41,Arrays,Easy,Remove Duplicates from Sorted Array,https://leetcode.com/problems/remove-duplicates-from-sorted-array/,Remove duplicates in-place such that each element appears only once.
+42,Arrays,Easy,Best Time to Buy and Sell Stock II,https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/,Maximize profit by buying and selling multiple times.
+43,Strings,Easy,First Unique Character in a String,https://leetcode.com/problems/first-unique-character-in-a-string/,Find the first non-repeating character.
+44,Strings,Medium,Group Anagrams,https://leetcode.com/problems/group-anagrams/,Group anagrams together.
+45,Linked List,Easy,Delete Node in a Linked List,https://leetcode.com/problems/delete-node-in-a-linked-list/,Delete a node given only access to that node.
+46,Linked List,Medium,Add Two Numbers,https://leetcode.com/problems/add-two-numbers/,Add two numbers represented by linked lists.
+47,Trees,Medium,Symmetric Tree,https://leetcode.com/problems/symmetric-tree/,Check if a binary tree is symmetric.
+48,Trees,Medium,Maximum Depth of Binary Tree,https://leetcode.com/problems/maximum-depth-of-binary-tree/,Find the maximum depth of a binary tree.
+49,Graphs,Medium,Pacific Atlantic Water Flow,https://leetcode.com/problems/pacific-atlantic-water-flow/,Find cells that can flow to both oceans.
+50,Graphs,Medium,Rotting Oranges,https://leetcode.com/problems/rotting-oranges/,Time for all oranges to rot.
+51,Dynamic Programming,Medium,Coin Change,https://leetcode.com/problems/coin-change/,Find minimum number of coins for a given amount.
+52,Dynamic Programming,Medium,House Robber,https://leetcode.com/problems/house-robber/,Maximize money robbed without alerting police.
+53,Searching,Medium,Search in Rotated Sorted Array,https://leetcode.com/problems/search-in-rotated-sorted-array/,Search for an element in a rotated sorted array.
+54,Sorting,Medium,Sort Colors,https://leetcode.com/problems/sort-colors/,Sort an array of 0s, 1s, and 2s.
+55,Hash Table,Medium,Group Anagrams,https://leetcode.com/problems/group-anagrams/,Revisit Group Anagrams using Hash Table.
+56,Stack,Medium,Daily Temperatures,https://leetcode.com/problems/daily-temperatures/,Calculate days until a warmer temperature.
+57,Queue,Medium,Walls and Gates,https://leetcode.com/problems/walls-and-gates/,Fill distances to nearest gate.
+58,Heaps,Medium,Top K Frequent Elements,https://leetcode.com/problems/top-k-frequent-elements/,Find the k most frequent elements.
+59,Backtracking,Medium,Combination Sum,https://leetcode.com/problems/combination-sum/,Find all unique combinations that sum to a target.
+60,Backtracking,Medium,Word Search,https://leetcode.com/problems/word-search/,Check if a word exists in a grid.
+61,Greedy,Medium,Jump Game II,https://leetcode.com/problems/jump-game-ii/,Minimum jumps to reach the end.
+62,Greedy,Medium,Hand of Straights,https://leetcode.com/problems/hand-of-straights/,Determine if a hand can be rearranged into groups.
+63,Math,Easy,Fizz Buzz,https://leetcode.com/problems/fizz-buzz/,FizzBuzz problem.
+64,Math,Medium,Pow(x, n),https://leetcode.com/problems/powx-n/,Implement pow(x, n).
+65,Bit Manipulation,Easy,Hamming Distance,https://leetcode.com/problems/hamming-distance/,Calculate Hamming distance between two integers.
+66,Bit Manipulation,Medium,Missing Number,https://leetcode.com/problems/missing-number/,Find the missing number in an array.
+67,Trie,Hard,Word Search II,https://leetcode.com/problems/word-search-ii/,Find all words in a grid.
+68,Union Find,Medium,Redundant Connection,https://leetcode.com/problems/redundant-connection/,Find the redundant connection to make a tree.
+69,Sliding Window,Medium,Permutation in String,https://leetcode.com/problems/permutation-in-string/,Check if s2 contains a permutation of s1.
+70,Sliding Window,Hard,Sliding Window Maximum,https://leetcode.com/problems/sliding-window-maximum/,Find the maximum in each sliding window.
+71,Two Pointers,Medium,Container With Most Water,https://leetcode.com/problems/container-with-most-water/,Find two lines that form a container with most water.
+72,Two Pointers,Medium,Trapping Rain Water,https://leetcode.com/problems/trapping-rain-water/,Calculate trapped rainwater.
+73,Graphs,Medium,Find the Town Judge,https://leetcode.com/problems/find-the-town-judge/,Find the town judge.
+74,Graphs,Hard,Network Delay Time,https://leetcode.com/problems/network-delay-time/,Time for all nodes to receive a signal.
+75,Trees,Hard,Serialize and Deserialize Binary Tree,https://leetcode.com/problems/serialize-and-deserialize-binary-tree/,Serialize and deserialize a binary tree.
+76,Dynamic Programming,Medium,Longest Increasing Subsequence,https://leetcode.com/problems/longest-increasing-subsequence/,Find the length of the longest increasing subsequence.
+77,Dynamic Programming,Medium,Word Break,https://leetcode.com/problems/word-break/,Determine if a string can be segmented into words from a dictionary.
+78,Backtracking,Medium,Subsets II,https://leetcode.com/problems/subsets-ii/,Generate all unique subsets with duplicates.
+79,Design,Medium,Design TinyURL,https://leetcode.com/problems/encode-and-decode-tinyurl/,Design a TinyURL service.
+80,Design,Medium,Implement Trie,https://leetcode.com/problems/implement-trie-prefix-tree/,Implement a Trie (revisit).
+81,Arrays,Medium,Product of Array Except Self,https://leetcode.com/problems/product-of-array-except-self/,Calculate product of all elements except self.
+82,Arrays,Medium,Maximum Subarray,https://leetcode.com/problems/maximum-subarray/,Find the contiguous subarray with the largest sum.
+83,Strings,Medium,Longest Substring Without Repeating Characters,https://leetcode.com/problems/longest-substring-without-repeating-characters/,Revisit with Sliding Window.
+84,Strings,Medium,Minimum Window Substring,https://leetcode.com/problems/minimum-window-substring/,Revisit with Sliding Window.
+85,Linked List,Medium,Cycle Linked List,https://leetcode.com/problems/linked-list-cycle/,Detect if a linked list has a cycle.
+86,Linked List,Medium,Remove Nth Node From End of List,https://leetcode.com/problems/remove-nth-node-from-end-of-list/,Remove the Nth node from the end of a linked list.
+87,Trees,Medium,Kth Smallest Element in a BST,https://leetcode.com/problems/kth-smallest-element-in-a-bst/,Find the kth smallest element in a BST.
+88,Trees,Medium,Lowest Common Ancestor of a Binary Tree,https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/,Find the LCA of two nodes in a binary tree.
+89,Graphs,Medium,Surrounded Regions,https://leetcode.com/problems/surrounded-regions/,Capture surrounded regions.
+90,Graphs,Medium,Course Schedule II,https://leetcode.com/problems/course-schedule-ii/,Find a valid course order.
+91,Dynamic Programming,Hard,Edit Distance,https://leetcode.com/problems/edit-distance/,Calculate minimum operations to convert one word to another.
+92,Dynamic Programming,Hard,Maximum Profit in Job Scheduling,https://leetcode.com/problems/maximum-profit-in-job-scheduling/,Find maximum profit from jobs with start/end times and profits.
+93,Searching,Hard,Median of Two Sorted Arrays,https://leetcode.com/problems/median-of-two-sorted-arrays/,Find the median of two sorted arrays.
+94,Sorting,Hard,Find K Closest Elements,https://leetcode.com/problems/find-k-closest-elements/,Find the k closest elements to a given value x.
+95,Hash Table,Medium,Longest Consecutive Sequence,https://leetcode.com/problems/longest-consecutive-sequence/,Find the length of the longest consecutive elements sequence.
+96,Stack,Medium,Largest Rectangle in Histogram,https://leetcode.com/problems/largest-rectangle-in-histogram/,Find the largest rectangle in a histogram.
+97,Queue,Medium,Binary Tree Right Side View,https://leetcode.com/problems/binary-tree-right-side-view/,Return the right side view of a binary tree.
+98,Heaps,Medium,Find Median from Data Stream,https://leetcode.com/problems/find-median-from-data-stream/,Design a data structure to find the median of a data stream.
+99,Backtracking,Hard,Sudoku Solver,https://leetcode.com/problems/sudoku-solver/,Solve a Sudoku puzzle.
+100,Greedy,Hard,Activity Selection Problem,https://www.geeksforgeeks.org/activity-selection-problem-greedy-algo-1/,Select maximum number of activities that can be performed.
