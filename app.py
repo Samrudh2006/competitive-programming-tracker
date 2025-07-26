@@ -5,122 +5,156 @@ import random
 import time
 from PIL import Image
 
-# Page setup
+# --- Page Setup ---
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
 
-# Initialize session state
+# --- Session State Setup ---
 if "user_name" not in st.session_state:
     st.session_state.user_name = ""
 if "profile_pic" not in st.session_state:
     st.session_state.profile_pic = None
-if "page" not in st.session_state:
-    st.session_state.page = "DSA Tracker"
+if "log" not in st.session_state:
+    st.session_state.log = []
+if "starred_notes" not in st.session_state:
+    st.session_state.starred_notes = []
 
-# ---------------- Sidebar ----------------
-with st.sidebar.form("profile_form"):
-    st.markdown("### 👤 Enter Profile Details")
-    name_input = st.text_input("Your Name", value=st.session_state.user_name)
-    profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
-    submitted = st.form_submit_button("Submit")
+# --- Sidebar ---
+with st.sidebar:
+    # Profile form
+    with st.form("profile_form"):
+        st.markdown("### 👤 Enter Profile Details")
+        name_input = st.text_input("Your Name", value=st.session_state.user_name)
+        profile_pic = st.file_uploader("Upload Profile Picture", type=["jpg", "png"])
+        submitted = st.form_submit_button("Submit")
+
+        if submitted:
+            st.session_state.user_name = name_input.strip() or "Coder"
+            st.session_state.profile_pic = profile_pic
+            st.success("✅ Profile Updated!")
+
+    # Display Profile
+    if st.session_state.user_name:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.session_state.profile_pic:
+                img = Image.open(st.session_state.profile_pic)
+                st.image(img, width=50)
+            else:
+                st.image("https://cdn-icons-png.flaticon.com/512/149/149071.png", width=50)
+        with col2:
+            st.markdown(f"**{st.session_state.user_name}**")
+        st.markdown("---")
+
+    # Sidebar Menu
+    st.markdown("### 📂 Menu")
+    menu_items = [
+        ("📊 DSA Tracker", "#dsa-tracker"),
+        ("📘 Submissions", "#submissions"),
+        ("📈 Progress", "#progress"),
+        ("📚 Problems", "#problems"),
+        ("💬 Discuss", "#discuss"),
+        ("🏆 Contests", "#contests"),
+        ("🎯 Daily Goals", "#daily-goals"),
+        ("📝 Notebook", "#notebook"),
+        ("🧪 Try New Features", "#try-new-features"),
+        ("⚙️ Settings", "#settings"),
+        ("🚪 Sign Out", "#sign-out")
+    ]
+    for name, link in menu_items:
+        st.markdown(f"[{name}]({link})")
+
+    # Theme Toggle
+    theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
+    if theme == "🌙 Dark":
+        st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+
+    # DSA Sheets
+    st.header("📚 DSA Sheets")
+    st.markdown("""
+    - [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)
+    - [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)
+    - [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)
+    - [Neetcode](https://neetcode.io/)
+    - [Blind 75](https://blind75.io/)
+    """)
+
+# --- Main Area ---
+
+# Welcome
+st.markdown(f"<h1>🚀 Welcome, {st.session_state.user_name or 'Coder'}!</h1>", unsafe_allow_html=True)
+
+# Daily Practice Log
+st.subheader("🔥 Daily Practice Log")
+with st.form("log_form"):
+    date = st.date_input("📅 Date", value=datetime.date.today())
+    count = st.number_input("🔢 Problems Solved", min_value=0)
+    notes = st.text_area("📝 Notes")
+    starred = st.checkbox("⭐ Mark as Important")
+    submitted = st.form_submit_button("Add Entry")
 
     if submitted:
-        st.session_state.user_name = name_input.strip() or "Coder"
-        st.session_state.profile_pic = profile_pic
-        st.success("✅ Profile Updated!")
+        entry = {"Date": date, "Solved": count, "Notes": notes}
+        st.session_state.log.append(entry)
+        if starred:
+            st.session_state.starred_notes.append(entry)
+        st.success("Log Added!")
 
-if st.session_state.user_name:
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        if st.session_state.profile_pic:
-            img = Image.open(st.session_state.profile_pic)
-            st.image(img, width=50)
-        else:
-            st.image("https://cdn-icons-png.flaticon.com/512/149/149071.png", width=50)
-    with col2:
-        st.markdown(f"**{st.session_state.user_name}**")
-    st.markdown("---")
+# Log Display
+if st.session_state.log:
+    df = pd.DataFrame(st.session_state.log)
+    st.line_chart(df.set_index("Date")["Solved"])
+    with st.expander("📘 View Log"):
+        st.dataframe(df)
 
-st.markdown("### 📂 Menu")
-pages = [
-    "DSA Tracker",
-    "Submissions",
-    "Progress",
-    "Problems",
-    "Discuss",
-    "Contests",
-    "Daily Goals",
-    "Notebook",
-    "Try New Features",
-    "Settings",
-    "Sign Out"
+# Weekly Goal Tracker
+st.subheader("🎯 Weekly Goal")
+weekly_goal = st.slider("Set your goal", 0, 70, 35)
+this_week = datetime.date.today().isocalendar()[1]
+solved_this_week = sum(
+    i["Solved"] for i in st.session_state.log
+    if pd.to_datetime(i["Date"]).isocalendar()[1] == this_week
+)
+st.progress(min(solved_this_week / weekly_goal, 1.0))
+st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
+
+# Pomodoro Timer
+st.subheader("⏱️ Focus Mode (Pomodoro)")
+timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
+if st.button("▶️ Start Timer"):
+    with st.empty():
+        for i in range(timer_min * 60, 0, -1):
+            m, s = divmod(i, 60)
+            st.metric("Time Left", f"{m:02d}:{s:02d}")
+            time.sleep(1)
+        st.success("⏰ Done! Take a break.")
+
+# Random Challenge
+st.subheader("📌 Daily Random Challenge")
+sheet_links = [
+    ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
+    ("Love Babbar", "https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view"),
+    ("GFG Sheet", "https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/"),
+    ("Neetcode", "https://neetcode.io/"),
+    ("Blind 75", "https://blind75.io/")
 ]
-choice = st.radio("", pages, index=pages.index(st.session_state.page))
-st.session_state.page = choice
-st.markdown("---")
+rand = random.choice(sheet_links)
+st.info(f"Try something new from: [{rand[0]} 🔗]({rand[1]})")
 
-theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
-if theme == "🌙 Dark":
-    st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+# Starred Notes
+if st.session_state.starred_notes:
+    st.subheader("⭐ Starred Notes")
+    for n in st.session_state.starred_notes[-5:]:
+        st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
 
-st.header("📚 DSA Sheets")
-st.markdown("""
-- [Striver SDE Sheet](https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/)
-- [Love Babbar Sheet](https://drive.google.com/file/d/1W8hwhfvd7bJqF1DYFFJ5cu_yq1OQ_L1D/view)
-- [GFG DSA Sheet](https://www.geeksforgeeks.org/dsa-sheet-by-love-babbar/)
-- [Neetcode](https://neetcode.io/)
-- [Blind 75](https://blind75.io/)
-""")
+# Motivational Quote
+quotes = [
+    "“Consistency is what transforms average into excellence.”",
+    "“The expert in anything was once a beginner.”",
+    "“Code more. Fear less.”",
+    "“Success is the sum of small efforts repeated daily.”"
+]
+st.success(f"💡 {random.choice(quotes)}")
 
-# ---------------- Main Content ----------------
-st.title(f"📊 {st.session_state.page}")
-
-if st.session_state.page == "DSA Tracker":
-    st.markdown("Welcome to your personalized coding progress dashboard.")
-    # ... insert tracker widgets here ...
-
-elif st.session_state.page == "Submissions":
-    st.write("📝 Your Submissions")
-    # ... insert submissions view here ...
-
-elif st.session_state.page == "Progress":
-    st.write("📈 Your Progress Charts")
-    # ... insert progress analysis widgets here ...
-
-elif st.session_state.page == "Problems":
-    st.write("📚 Problem Bank")
-    # ... link to problem lists or filters ...
-
-elif st.session_state.page == "Discuss":
-    st.write("💬 Discussion Forums (external links)")
-    st.markdown("- [GeeksforGeeks Forum](https://discuss.geeksforgeeks.org/)\n- [Stack Overflow](https://stackoverflow.com/)")
-
-elif st.session_state.page == "Contests":
-    st.write("🏆 Upcoming Contests")
-    # ... display contest info (static or API-based) ...
-
-elif st.session_state.page == "Daily Goals":
-    st.write("🎯 Set and track your daily/weekly goals")
-    # ... include goal tracker UI ...
-
-elif st.session_state.page == "Notebook":
-    st.write("📝 Your Notes & Flashcards")
-    # ... integrate notebook space ...
-
-elif st.session_state.page == "Try New Features":
-    st.write("🧪 Explore upcoming or beta features:")
-    # ... list new features toggle or roadmap ...
-
-elif st.session_state.page == "Settings":
-    st.write("⚙️ Settings")
-    # ... include theme choice, profile reset, export preferences ...
-
-elif st.session_state.page == "Sign Out":
-    st.write("🚪 Signing out...")
-    st.session_state.user_name = ""
-    st.session_state.profile_pic = None
-    st.session_state.page = "DSA Tracker"
-    st.experimental_rerun()
-
-# ---------------- Footer ----------------
+# Footer
 st.markdown("---")
 st.markdown("<center>✨ Built with ❤️ using Streamlit | Keep Coding ✨</center>", unsafe_allow_html=True)
