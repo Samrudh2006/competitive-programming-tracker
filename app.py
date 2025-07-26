@@ -55,10 +55,35 @@ st.markdown("💬 [Discuss](https://discuss.geeksforgeeks.org/)")
 st.markdown("🏆 [Contests](https://leetcode.com/contest/)")
 st.markdown("📝 [Notebook](#notebook)")
 
-    # Theme Toggle
-    theme = st.radio("🖌️ Theme", ["🌞 Light", "🌙 Dark"])
-    if theme == "🌙 Dark":
-        st.markdown("<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>", unsafe_allow_html=True)
+
+    
+# --- Sidebar Theme Toggle ---
+theme = st.sidebar.radio("🖌️ Choose Theme", ["🌞 Light", "🌙 Dark"])
+
+if theme == "🌙 Dark":
+    st.markdown("""
+        <style>
+        body {
+            background-color: #0e1117;
+            color: #f5f6fa;
+        }
+        .stApp {
+            background-color: #0e1117;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+        <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .stApp {
+            background-color: #ffffff;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
     # DSA Sheets
     st.header("📚 DSA Sheets")
