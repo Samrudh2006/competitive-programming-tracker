@@ -47,6 +47,7 @@ with st.sidebar:
 
     # Sidebar Menu
 # --- Navigation Menu ---
+# --- Navigation Menu ---
 st.sidebar.header("📂 Menu")
 
 menu = st.sidebar.radio("Navigate to", [
@@ -59,29 +60,32 @@ menu = st.sidebar.radio("Navigate to", [
 ])
 
 # --- Handle Menu Navigation with External Links ---
+query_params = st.query_params
+
 if menu == "🏁 DSA Tracker":
-    st.experimental_set_query_params(section="dsa-tracker")
+    query_params["section"] = "dsa-tracker"
     st.markdown("[🔗 Go to DSA 30 Days (Unstop)](https://unstop.com/competitions/30-days-dsa-challenge-unstop-632056)", unsafe_allow_html=True)
 
 elif menu == "📊 Submissions":
-    st.experimental_set_query_params(section="submissions")
+    query_params["section"] = "submissions"
     st.markdown("[🔗 Open LeetCode Dashboard](https://leetcode.com/progress/)", unsafe_allow_html=True)
 
 elif menu == "📈 Progress":
-    st.experimental_set_query_params(section="progress")
+    query_params["section"] = "progress"
     st.markdown("📆 Your daily/weekly stats are shown below ⬇️")
 
 elif menu == "💬 Discuss":
-    st.experimental_set_query_params(section="discuss")
+    query_params["section"] = "discuss"
     st.markdown("[🔗 Ask doubts on GFG Discuss](https://practice.geeksforgeeks.org/discuss)", unsafe_allow_html=True)
 
 elif menu == "🏆 Contests":
-    st.experimental_set_query_params(section="contests")
+    query_params["section"] = "contests"
     st.markdown("[🔗 LeetCode Contests Page](https://leetcode.com/contest/)", unsafe_allow_html=True)
 
 elif menu == "📝 Notebook":
-    st.experimental_set_query_params(section="notebook")
+    query_params["section"] = "notebook"
     st.text_area("🧠 Personal Notes / Scratchpad", height=200)
+
     
 
 
