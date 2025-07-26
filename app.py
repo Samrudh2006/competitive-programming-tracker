@@ -3,9 +3,12 @@ import pandas as pd
 import datetime
 import random
 import time
+import calendar
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # --- Page Setup ---
-st.set_page_config(page_title="💻 CP Tracker", layout="wide")
+st.set_page_config(page_title="💻 CP Tracker+", layout="wide")
 
 # --- Session State Setup ---
 if "user_name" not in st.session_state:
@@ -50,15 +53,17 @@ with st.form("log_form"):
     date = st.date_input("📅 Date", value=datetime.date.today())
     count = st.number_input("🔢 Problems Solved", min_value=0)
     notes = st.text_area("📝 Notes")
+    topic = st.selectbox("📚 Topic", ["Arrays", "Strings", "Linked List", "DP", "Trees", "Graphs", "Maths", "Stacks & Queues", "Others"])
     starred = st.checkbox("⭐ Mark as Important")
     submitted = st.form_submit_button("Add Entry")
     if submitted:
-        entry = {"Date": date, "Solved": count, "Notes": notes}
+        entry = {"Date": date, "Solved": count, "Notes": notes, "Topic": topic}
         st.session_state.log.append(entry)
         if starred:
             st.session_state.starred_notes.append(entry)
         st.success("Log Added!")
 
+# --- Logs Display ---
 if st.session_state.log:
     df = pd.DataFrame(st.session_state.log)
     st.line_chart(df.set_index("Date")["Solved"])
@@ -73,7 +78,25 @@ solved_this_week = sum(i["Solved"] for i in st.session_state.log if pd.to_dateti
 st.progress(min(solved_this_week / weekly_goal, 1.0))
 st.write(f"**{solved_this_week} / {weekly_goal} solved this week**")
 
-# --- Pomodoro Timer ---
+# --- Streak Tracker ---
+st.subheader("🔥 Streak Tracker")
+dates = sorted([pd.to_datetime(i["Date"]).date() for i in st.session_state.log])
+streak = 0
+today = datetime.date.today()
+for i in range(len(dates)-1, -1, -1):
+    if (today - dates[i]).days == streak:
+        streak += 1
+    else:
+        break
+st.write(f"🔥 **Current Streak:** {streak} days")
+
+# --- Pie Chart for Topics ---
+st.subheader("📊 Practice Distribution by Topic")
+if st.session_state.log:
+    pie_data = pd.DataFrame(st.session_state.log)["Topic"].value_counts()
+    st.pyplot(pie_data.plot.pie(autopct='%1.1f%%', figsize=(5, 5)).get_figure())
+
+# --- Pomodoro Timer (Auto, No Stop Button) ---
 st.subheader("⏱️ Focus Mode (Pomodoro)")
 timer_min = st.selectbox("Focus Time (minutes)", [15, 25, 45])
 if st.button("▶️ Start Timer"):
@@ -82,9 +105,9 @@ if st.button("▶️ Start Timer"):
             m, s = divmod(i, 60)
             st.metric("Time Left", f"{m:02d}:{s:02d}")
             time.sleep(1)
-        st.success("⏰ Done! Take a break.")
+        st.success("⏰ Done! Take a break!")
 
-# --- Daily Random Challenge ---
+# --- Random Daily Challenge ---
 st.subheader("📌 Daily Random Challenge")
 sheet_links = [
     ("Striver SDE", "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/"),
@@ -101,6 +124,24 @@ if st.session_state.starred_notes:
     st.subheader("⭐ Starred Notes")
     for n in st.session_state.starred_notes[-5:]:
         st.markdown(f"- **{n['Date']}**: {n['Notes']} ({n['Solved']} problems)")
+
+# --- DSA Flashcards ---
+st.subheader("🧠 DSA Concept Flashcard")
+cards = {
+    "Two Pointer Technique": "Used for searching pairs in a sorted array.",
+    "Sliding Window": "Efficient for problems involving subarrays or substrings.",
+    "Binary Search": "Search in a sorted array in O(log n) time.",
+    "Recursion vs DP": "DP is recursion + memoization/tabulation.",
+}
+concept = st.selectbox("Pick a concept", list(cards.keys()))
+st.info(cards[concept])
+
+# --- Export Logs ---
+if st.session_state.log:
+    st.subheader("📂 Export Logs")
+    df = pd.DataFrame(st.session_state.log)
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Download Log as CSV", data=csv, file_name="cp_log.csv", mime="text/csv")
 
 # --- Motivational Quote ---
 quotes = [
