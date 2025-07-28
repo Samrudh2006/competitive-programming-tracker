@@ -7,6 +7,58 @@ from PIL import Image
 
 # --- Page Setup ---
 st.set_page_config(page_title="💻 CP Tracker", layout="wide")
+import streamlit as st
+from PIL import Image
+
+# --- Simulated Login ---
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.set_page_config(page_title="Login | CP Tracker", layout="centered")
+
+    # Optional Background Style (Glass Effect)
+    st.markdown(
+        """
+        <style>
+        .glass-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            color: white;
+            width: 400px;
+            margin: auto;
+        }
+        .glass-box h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown('<div class="glass-box">', unsafe_allow_html=True)
+    st.markdown("<h2>🔐 Login</h2>", unsafe_allow_html=True)
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    remember = st.checkbox("Remember me")
+    login_btn = st.button("Login")
+
+    if login_btn:
+        if username.strip() and password.strip():
+            st.session_state.logged_in = True
+            st.session_state.user_name = username.strip()
+            st.experimental_rerun()
+        else:
+            st.error("Please enter both username and password.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
 
 # --- Session State Setup ---
 if "user_name" not in st.session_state:
